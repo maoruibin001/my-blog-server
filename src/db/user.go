@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"my-blog-server/src/utils"
 )
@@ -46,30 +45,45 @@ func InsertUser(data UserInfo) UserSchema {
 }
 
 func FindByName(name string) []UserSchema {
+	return UserMultiFindByKV("name", name)
+}
+
+func UserSingleFindByKV(key string, v interface{}) UserSchema {
+
 	c, session := GetCollect("my-blog-2", "user")
 	defer session.Close()
-	results := UserFindByKV(c, "name", name)
-	return results                                                  }
-
-func UserFindByKV(c *mgo.Collection, key string, v interface{}) []UserSchema {
 
 	results := []UserSchema{}
 
 	utils.HandleError("find error: ", c.Find(bson.M{key: v}).All(&results))
-
-	return results
-}
-func FindByPhone(phoneNumber string) UserSchema {
-
-	c, session := GetCollect("my-blog-2", "user")
-	defer session.Close()
-	results := UserFindByKV(c, "phone", phoneNumber)
 
 	result := UserSchema{}
 	if len(results) > 0 {
 		result = results[0]
 	}
 	return result
+}
+
+func UserMultiFindByKV( key string, v interface{}) []UserSchema {
+
+	c, session := GetCollect("my-blog-2", "user")
+	defer session.Close()
+
+	results := []UserSchema{}
+
+	utils.HandleError("find error: ", c.Find(bson.M{key: v}).All(&results))
+
+
+	return results
+}
+func FindByPhone(phoneNumber string) UserSchema {
+
+	return UserSingleFindByKV("phone", phoneNumber)
+}
+
+func FindById(id string) UserSchema {
+
+	return UserSingleFindByKV("id", id)
 }
 
 func CreateUser(name, age, phone, password, salt string) UserSchema {
@@ -82,6 +96,26 @@ func CreateUser(name, age, phone, password, salt string) UserSchema {
 	return InsertUser(userInfo)
 }
 
+func ChangeUser(id, name, age, phone, salt string) error {
+	c, session := GetCollect("my-blog-2", "user")
+	defer session.Close()
+
+	selector := bson.M{"id": id}
+	data := bson.M{"name": name, "age": age, "phone": phone, "salt": salt}
+
+	err := c.Update(selector, bson.M{"$set": data})
+
+	return err
+}
+
+func RemoveUser(k string, v interface{}) error {
+	c, session := GetCollect("my-blog-2", "user")
+	defer session.Close()
+
+	err := c.Remove(bson.M{k: v})
+
+	return err
+}
 func InitUserData()  {
 	c, session := GetCollect("my-blog-2", "user")
 	defer session.Close()
