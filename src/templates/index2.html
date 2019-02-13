@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+<h1>hello world , i am login</h1>
+<button onclick="addUser()">addUser</button>
+<button onclick="queryUser()">query</button>
+<button onclick="changeUser()">change</button>
+
+<h1>article</h1>
+<button onclick="addArticle()">add2</button>
+<button onclick="queryArticle()">query</button>
+<button onclick="changeArticle()">change</button>
+<button onclick="deleteArticle()">delete</button>
+
+
+<script>
+    function addUser() {
+        $.post('/api/user', {
+            "name": "maoruibin",
+            "password": "123",
+            "phone": "18682021295"
+        }, function (res) {
+            console.log(typeof res)
+        })
+    }
+
+    function changeUser() {
+        $.ajax({
+            url: '/api/user',
+            type: 'patch',
+            data: {
+                id: '5c53cad32b59354eef864416',
+                phone: "18682021298",
+                name: "ruibin",
+                age: "30"
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
+    function queryUser() {
+        $.ajax({
+            url: '/api/user/18682021295',
+            type: 'delete',
+            data: {
+                phone: "18682021295"
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
+
+
+
+
+
+
+    function addArticle() {
+        debugger;
+        $.post('/api/user', {
+            "title": "maoruibin",
+            "tags": "123",
+            "content": "18682021295"
+        }, function (res) {
+            console.log(typeof res)
+        })
+    }
+
+    function changeArticle() {
+        $.ajax({
+            url: '/api/user',
+            type: 'patch',
+            data: {
+                id: '5c53cad32b59354eef864416',
+                phone: "18682021298",
+                name: "ruibin",
+                age: "30"
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
+    function queryArticle() {
+        $.ajax({
+            url: '/api/user',
+            type: 'get',
+            data: {
+                phone: "18682021295"
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
+
+    function deleteArticle() {
+        $.ajax({
+            url: '/api/user/18682021295',
+            type: 'delete',
+            data: {
+                phone: "18682021295"
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+</script>
+</body>
+</html>

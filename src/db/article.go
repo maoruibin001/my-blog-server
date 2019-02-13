@@ -6,12 +6,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"log"
 	"my-blog-server/src/utils"
-	"strings"
 	"time"
 )
 
 type ArticleSchema struct {
-	Aid int `aid:"aid"`
+	Aid int `json:"aid"`
 	Title  string    `json:"title"`
 	Content string	 `json:"content"`
 	Tags []string `json:"tags"`
@@ -30,6 +29,7 @@ func InsertArticle(data ArticleSchema) ArticleSchema {
 	m.Date = data.Date
 	m.IsPublish = data.IsPublish
 	m.CommentN = data.CommentN
+	m.Content = data.Content
 
 	utils.HandleError("insert error: ", c.Insert(&m))
 	fmt.Println("插入一条数据", m)
@@ -38,24 +38,42 @@ func InsertArticle(data ArticleSchema) ArticleSchema {
 
 }
 
-func FindByArtcleId(id string) []ArticleSchema {
+func FindByArtcleId(id int) []ArticleSchema {
 	return ArticleMultiFindByKV("aid", id)
 }
 
-func ArticleSingleFindByKV(key string, v interface{}) UserSchema {
+func ArticleSingleFindByKV(key string, v interface{}) ArticleSchema {
 
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
-	results := []UserSchema{}
+	results := []ArticleSchema{}
 
 	utils.HandleError("find error: ", c.Find(bson.M{key: v}).All(&results))
 
-	result := UserSchema{}
+	result := ArticleSchema{}
 	if len(results) > 0 {
 		result = results[0]
 	}
 	return result
+}
+
+func GetArticles(key string, v interface{}, pageSize, pageNo, all int) ([]ArticleSchema, error)  {
+	c, session := GetCollect("my-blog-2", "article")
+	defer session.Close()
+
+	results := []ArticleSchema{}
+	var err error = nil
+	if key == "" {
+		if all == 1 {
+			err = c.Find(nil).All(&results)
+		} else {
+			err = c.Find(nil).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
+		}
+	} else {
+		err = c.Find(bson.M{key: v}).Limit(pageSize).Skip((pageNo - 1) * pageSize).All(&results)
+	}
+	return results, err
 }
 
 func ArticleMultiFindByKV( key string, v interface{}) []ArticleSchema {
@@ -72,7 +90,7 @@ func ArticleMultiFindByKV( key string, v interface{}) []ArticleSchema {
 }
 
 func generationAid() int {
-	counter, session := GetCollect("my-blog-2", "counter")
+	counter, session := GetCollect("my-blog-2", "acounter")
 	defer session.Close()
 
 	change := mgo.Change{
@@ -87,23 +105,24 @@ func generationAid() int {
 	log.Println("doc:", doc)
 	return doc.Aid
 }
-func CreateArticle(title, tags string, isPublish, comentN int) ArticleSchema {
+func CreateArticle(title string, tags []string, isPublish, comentN int, content string) ArticleSchema {
 	var m = ArticleSchema{}
 	m.Aid = generationAid()
 	m.Title = title
-	m.Tags = strings.Split(tags, ",")
-	m.Date = time.Now().Unix()
+	m.Tags = tags
+	m.Date = time.Now().UnixNano() / 1e6
 	m.IsPublish = isPublish == 1
 	m.CommentN = comentN
+	m.Content = content
 	return InsertArticle(m)
 }
 
-func ChangeArticle(id, name, age, phone, salt string) error {
+func ChangeArticle(aid int, title string, tags []string, isPublish, comentN int, content string) error {
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
-	selector := bson.M{"id": id}
-	data := bson.M{"name": name, "age": age, "phone": phone, "salt": salt}
+	selector := bson.M{"aid": aid}
+	data := bson.M{"title": title, "tags": tags, "isPublish": isPublish, "comentN": comentN, "content": content}
 
 	err := c.Update(selector, bson.M{"$set": data})
 
