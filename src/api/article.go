@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2/bson"
 	"my-blog-server/src/db"
 	"my-blog-server/src/utils"
 	"net/http"
@@ -142,6 +143,7 @@ func initArticle(router *gin.Engine) {
 
 		pageSizeStr := context.Query("pageSize")
 		pageNoStr := context.Query("pageNo")
+		tag := context.Query("tag")
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
 		if err != nil {
@@ -153,7 +155,60 @@ func initArticle(router *gin.Engine) {
 			pageNo = 1
 		}
 
-		articles, err := db.GetArticles("", "", pageSize, pageNo, 0)
+		var articles []db.ArticleSchema
+
+		fmt.Println("tags is: ", tag)
+		if tag != "" && tag != "全部"{
+			articles, err = db.GetArticles("tags", tag, pageSize, pageNo, 0)
+		} else {
+			articles, err = db.GetArticles("", "", pageSize, pageNo, 0)
+		}
+		//articles, err := db.GetArticles("", "", pageSize, pageNo, 0)
+
+		if err != nil {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR,  gin.H{
+				"message": "pageSize: " + pageSizeStr + "pageNo: " + pageNoStr,
+			})
+			return
+		}
+		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, articles)
+	})
+
+	router.GET("/api/someArticles", func(context *gin.Context) {
+		fmt.Println("hello world")
+		context.DefaultQuery("pageSize", "10")
+		context.DefaultQuery("pageNo", "1")
+
+
+		pageSizeStr := context.Query("pageSize")
+		pageNoStr := context.Query("pageNo")
+		key := context.Query("key")
+
+		pageSize, err := strconv.Atoi(pageSizeStr)
+		if err != nil {
+			pageSize = 10
+		}
+
+		pageNo, err := strconv.Atoi(pageNoStr)
+		if err != nil {
+			pageNo = 1
+		}
+
+		fmt.Println("key: ", key)
+		var articles []db.ArticleSchema
+
+		if key == "" {
+			articles, err = db.GetArticles("", key, pageSize, pageNo, 0)
+		} else {
+			conditions := []bson.M{
+				bson.M{"title": bson.M{"$regex": key, "$options": "$i"}},
+				bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
+				bson.M{"datestr": bson.M{"$regex": key, "$options": "$i"}},
+				bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
+			}
+			articles, err = db.GetSomeArticles(bson.M{"$or": conditions}, pageSize, pageNo)
+		}
+
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR,  gin.H{

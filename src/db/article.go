@@ -17,6 +17,7 @@ type ArticleSchema struct {
 	Date int64 `json:"date"`
 	IsPublish bool `json:"isPublish"`
 	CommentN int `json:"commentN"`
+	DateStr string `json:"dateStr"`
 }
 
 func InsertArticle(data ArticleSchema) ArticleSchema {
@@ -27,9 +28,11 @@ func InsertArticle(data ArticleSchema) ArticleSchema {
 	m.Title = data.Title
 	m.Tags = data.Tags
 	m.Date = data.Date
+	m.DateStr = data.DateStr
 	m.IsPublish = data.IsPublish
 	m.CommentN = data.CommentN
 	m.Content = data.Content
+
 
 	utils.HandleError("insert error: ", c.Insert(&m))
 	fmt.Println("插入一条数据", m)
@@ -58,6 +61,19 @@ func ArticleSingleFindByKV(key string, v interface{}) ArticleSchema {
 	return result
 }
 
+func GetSomeArticles(conditions bson.M, pageSize, pageNo int)  ([]ArticleSchema, error) {
+	c, session := GetCollect("my-blog-2", "article")
+	defer session.Close()
+
+	results := []ArticleSchema{}
+	var err error = nil
+	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
+
+	fmt.Println("results:", results)
+	return results, err
+}
+
+
 func GetArticles(key string, v interface{}, pageSize, pageNo, all int) ([]ArticleSchema, error)  {
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
@@ -73,6 +89,8 @@ func GetArticles(key string, v interface{}, pageSize, pageNo, all int) ([]Articl
 	} else {
 		err = c.Find(bson.M{key: v}).Limit(pageSize).Skip((pageNo - 1) * pageSize).All(&results)
 	}
+
+	fmt.Println("results:", results)
 	return results, err
 }
 
@@ -111,6 +129,7 @@ func CreateArticle(title string, tags []string, isPublish, comentN int, content 
 	m.Title = title
 	m.Tags = tags
 	m.Date = time.Now().UnixNano() / 1e6
+	m.DateStr = time.Now().Format("2006年01月02日 15时04分05秒")
 	m.IsPublish = isPublish == 1
 	m.CommentN = comentN
 	m.Content = content

@@ -24,7 +24,10 @@ type CommentSchema struct {
 	Cid int `json:"cid"`
 	Date int64 `json:"date"`
 	Like int `json:"like"`
+	LikeEmails []string `json:"likeEmails"`
 }
+
+
 
 func generationCid() int {
 	counter, session := GetCollect("my-blog-2", "ccounter")
@@ -84,6 +87,7 @@ func AddComment(aid int, imgName, name, address, content string) (CommentSchema,
 
 
 	m.Like = 0
+	m.LikeEmails = []string{}
 	m.Date = time.Now().UnixNano() / 1e6
 	m.Aid = aid
 	m.Cid = generationCid()
@@ -100,12 +104,14 @@ func AddComment(aid int, imgName, name, address, content string) (CommentSchema,
 	selector := bson.M{"aid": aid}
 
 
-	if err != nil {
+	if len(comments.Comments) == 0 && comments.Aid == 0 {
 		fmt.Println("err", err, "插入一条新数据")
 		comments = CommentSetSchema{}
 		comments.Comments = append(comments.Comments, m)
 		comments.Aid = aid
 		comments.Count = len(comments.Comments)
+
+		fmt.Println("comments is: ", comments)
 		err = c.Insert(&comments)
 
 		fmt.Println("插入出错", err)
@@ -150,7 +156,7 @@ func DeleteComment(aid, cid int) error  {
 	return err
 }
 
-func ChangeComment(aid, cid int, imgName, name, address, content string) (CommentSchema, error)  {
+func ChangeComment(aid, cid int, imgName, name, address, content string, like int, likeEmails []string) (CommentSchema, error)  {
 
 	m := CommentSchema{}
 	comments, index,  err := QueryCommentIndex(aid, cid)
@@ -160,7 +166,7 @@ func ChangeComment(aid, cid int, imgName, name, address, content string) (Commen
 		return m, err
 	}
 
-	m.Like = 0
+	m.Like = like
 	m.Date = time.Now().UnixNano() / 1e6
 	m.Aid = aid
 	m.Cid = cid
@@ -168,6 +174,7 @@ func ChangeComment(aid, cid int, imgName, name, address, content string) (Commen
 	m.ImgName = imgName
 	m.Name = name
 	m.Address = address
+	m.LikeEmails = likeEmails
 
 	comments.Comments[index] = m
 
@@ -192,15 +199,20 @@ func QueryCommentSet(aid int)  (CommentSetSchema, error) {
 
 
 	result := CommentSetSchema{}
+	results := []CommentSetSchema{}
 	var err error = nil
 
 	if aid == 0 {
 		return result, err
 	}
 
-	err = c.Find(bson.M{"aid": aid}).One(&result)
+	err = c.Find(bson.M{"aid": aid}).All(&results)
 
-	return result, err
+	if len(results) == 0 {
+		return result, err
+	} else {
+		return results[0], err
+	}
 }
 
 func QueryCommentIndex(aid, cid int) (CommentSetSchema, int, error) {

@@ -97,7 +97,7 @@ func ResponseJson(context *gin.Context, code, retCode int, data interface{})  {
 		"data": data,
 	}
 
-
+	log.Println(code, retCode)
 	context.JSON(code, result)
 }
 
