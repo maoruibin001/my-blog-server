@@ -9,12 +9,14 @@ import (
 )
 
 func InitRouter(router *gin.Engine) {
-	initArticle(router)
+
 	initComment(router)
 	initDraft(router)
-	initLogin(router)
 	initTag(router)
 	initUser(router)
+	initLogin(router)
+	initArticle(router)
+
 
 	router.GET("/", func(context *gin.Context) {
 		context.HTML(http.StatusOK, "index.html", nil)

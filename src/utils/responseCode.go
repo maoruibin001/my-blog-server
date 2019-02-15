@@ -21,4 +21,8 @@ const RESPONSESERVERERROR = 13000 //服务端出错
 
 const RESPONSEUPDATEERROR = 14000 // 数据更新失败
 
+const RESPONSETOKENINVALID = 15000 // token失效
+
+const RESPONSENOTOKEN = 15001 // 没有token
+
 

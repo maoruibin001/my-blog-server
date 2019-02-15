@@ -4,27 +4,31 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2/bson"
+	"my-blog-server/src/config"
 	"my-blog-server/src/db"
+	"my-blog-server/src/middleware"
 	"my-blog-server/src/utils"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
-func createArticle(title, tags string, content string) interface{} {
-	tagList := strings.Split(tags, ",")
-	info := db.CreateArticle(title, tagList, 0, 0, content)
+func createArticle(title string, tags []string, content string) interface{} {
+	info := db.CreateArticle(title, tags, 1, 0, content)
 	return info
 }
 func initArticle(router *gin.Engine) {
 	//创建文章
-	router.POST("/api/article", func(context *gin.Context) {
+	router.POST("/api/article", middleware.JWTAuth(),func(context *gin.Context) {
 		fmt.Println("create Article ....")
 
-		title := context.PostForm("title")
-		tags := context.PostForm("tags")
-		content := context.PostForm("content")
+		var article = db.ArticleSchema{}
+		context.BindJSON(&article)
 
+		title := article.Title
+		tags := article.Tags
+		content := article.Content
+
+		fmt.Println("article is: ", article)
 
 		articleInfo := createArticle(title, tags, content)
 
@@ -33,7 +37,7 @@ func initArticle(router *gin.Engine) {
 
 	//查询文章信息
 
-	router.GET("/api/article/:aid", func(context *gin.Context) {
+	router.GET("/api/articles/:aid", func(context *gin.Context) {
 		aidStr := context.Param("aid")
 
 		aid, err := strconv.Atoi(aidStr)
@@ -47,7 +51,7 @@ func initArticle(router *gin.Engine) {
 		}
 		fmt.Println("aid is: ", aid)
 
-		article := db.ArticleSingleFindByKV("aid", aid)
+		article := db.ArticleSingleFindByKV(bson.M{"aid": aid})
 
 		fmt.Println("article: ", article)
 		if article.Aid == aid && aid != 0{
@@ -57,13 +61,17 @@ func initArticle(router *gin.Engine) {
 		}
 	})
 	//修改文章
-	router.PATCH("/api/article", func(context *gin.Context) {
-		context.Request.ParseForm()
-		title := context.Request.FormValue("title")
-		content := context.Request.FormValue("content")
-		_tags := context.Request.FormValue("tags")
-		tags := []string{}
-		aidStr := context.Request.FormValue("aid")
+	router.PATCH("/api/articles/:aid",middleware.JWTAuth(), func(context *gin.Context) {
+
+		var article = db.ArticleSchema{}
+		context.BindJSON(&article)
+
+		title := article.Title
+		content := article.Content
+		tags := article.Tags
+
+		fmt.Println("article: is : ", article)
+		aidStr := context.Param("aid")
 		aid, err := strconv.Atoi(aidStr)
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, gin.H{
@@ -73,36 +81,38 @@ func initArticle(router *gin.Engine) {
 
 		}
 
-		article := db.ArticleSingleFindByKV("aid", aid)
+		article = db.ArticleSingleFindByKV(bson.M{"aid": aid})
 
 		if article.Aid != aid || aid == 0 {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOARTICLE, nil)
 			return
 		}
 
+
+		fmt.Println("content is : ", content)
+		fmt.Println("title is: ", title)
+		fmt.Println("tags is: ", tags)
 		if title == "" {
 			title = article.Title
 		}
 		if content == "" {
 			content = article.Content
 		}
-		if _tags == "" {
+		if len(tags) == 0 {
 			tags = article.Tags
-		} else {
-			tags = strings.Split(_tags, ",")
 		}
 
-		err = db.ChangeArticle(aid, title, tags, 0, article.CommentN, content)
+		err = db.ChangeArticle(aid, title, tags, true, article.CommentN, content)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEUPDATEERROR, nil)
 		} else {
-			article := db.ArticleSingleFindByKV("aid", aid)
+			article := db.ArticleSingleFindByKV(bson.M{"aid": aid})
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, article)
 		}
 	})
 	//删除文章
-	router.DELETE("/api/article/:aid", func(context *gin.Context) {
+	router.DELETE("/api/articles/:aid",middleware.JWTAuth(), func(context *gin.Context) {
 
 		aidStr := context.Param("aid")
 
@@ -116,7 +126,7 @@ func initArticle(router *gin.Engine) {
 		}
 
 		//查询用户
-		article := db.ArticleSingleFindByKV("aid", aid)
+		article := db.ArticleSingleFindByKV(bson.M{"aid": aid})
 
 		if article.Aid != aid || aid == 0 {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOARTICLE, nil)
@@ -138,30 +148,41 @@ func initArticle(router *gin.Engine) {
 	//分页查询所有文章
 
 	router.GET("/api/articles", func(context *gin.Context) {
-		context.DefaultQuery("pageSize", "10")
-		context.DefaultQuery("pageNo", "1")
+		pageSizeStr := context.DefaultQuery("pageSize", config.DEFAULTPAGESIZI)
+		pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
+		isAll := context.DefaultQuery("isAll", "0")
 
-		pageSizeStr := context.Query("pageSize")
-		pageNoStr := context.Query("pageNo")
+		fmt.Println("pageSizeStr", pageNoStr)
 		tag := context.Query("tag")
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
 		if err != nil {
-			pageSize = 10
+			//pageSize = 10
+			fmt.Println("err: ", err)
 		}
 
 		pageNo, err := strconv.Atoi(pageNoStr)
 		if err != nil {
-			pageNo = 1
+			//pageNo = 1
 		}
 
-		var articles []db.ArticleSchema
+		fmt.Println("pagesize: ", pageSize, pageNo)
+		var articles db.ResData
 
 		fmt.Println("tags is: ", tag)
-		if tag != "" && tag != "全部"{
-			articles, err = db.GetArticles("tags", tag, pageSize, pageNo, 0)
+		if isAll == "1" {
+			if tag != "" && tag != "全部"{
+				articles, err = db.GetArticles(bson.M{"tags": tag}, pageSize, pageNo)
+			} else {
+				articles, err = db.GetArticles(nil, pageSize, pageNo)
+			}
 		} else {
-			articles, err = db.GetArticles("", "", pageSize, pageNo, 0)
+			if tag != "" && tag != "全部"{
+				articles, err = db.GetArticles(bson.M{"tags": tag, "ispublish": true}, pageSize, pageNo)
+			} else {
+				fmt.Println()
+				articles, err = db.GetArticles(bson.M{"ispublish": true}, pageSize, pageNo)
+			}
 		}
 		//articles, err := db.GetArticles("", "", pageSize, pageNo, 0)
 
@@ -175,13 +196,11 @@ func initArticle(router *gin.Engine) {
 	})
 
 	router.GET("/api/someArticles", func(context *gin.Context) {
-		fmt.Println("hello world")
-		context.DefaultQuery("pageSize", "10")
-		context.DefaultQuery("pageNo", "1")
+		pageSizeStr := context.DefaultQuery("pageSize", config.DEFAULTPAGESIZI)
+		pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
+		isAll := context.DefaultQuery("isAll", "0")
 
 
-		pageSizeStr := context.Query("pageSize")
-		pageNoStr := context.Query("pageNo")
 		key := context.Query("key")
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
@@ -195,20 +214,34 @@ func initArticle(router *gin.Engine) {
 		}
 
 		fmt.Println("key: ", key)
-		var articles []db.ArticleSchema
+		var articles db.ResData
 
-		if key == "" {
-			articles, err = db.GetArticles("", key, pageSize, pageNo, 0)
-		} else {
-			conditions := []bson.M{
-				bson.M{"title": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"datestr": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
+		if isAll == "1" {
+			if key == "" {
+				articles, err = db.GetArticles(nil, pageSize, pageNo)
+			} else {
+				conditions := []bson.M{
+					bson.M{"title": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"datestr": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
+				}
+				articles, err = db.GetSomeArticles(bson.M{"$or": conditions}, pageSize, pageNo)
 			}
-			articles, err = db.GetSomeArticles(bson.M{"$or": conditions}, pageSize, pageNo)
+		} else {
+			if key == "" {
+				articles, err = db.GetArticles(bson.M{"ispublish": true}, pageSize, pageNo)
+			} else {
+				conditions := []bson.M{
+					bson.M{"title": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"datestr": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
+					bson.M{"ispublish": true},
+				}
+				articles, err = db.GetSomeArticles(bson.M{"$or": conditions}, pageSize, pageNo)
+			}
 		}
-
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR,  gin.H{

@@ -23,6 +23,8 @@ func initResCode() {
 	ResArr[RESPONSEPARAMERROR] = "请求参数错误"
 	ResArr[RESPONSESERVERERROR] = "操作有误"
 	ResArr[RESPONSEUPDATEERROR] = "数据更新失败"
+	ResArr[RESPONSETOKENINVALID] = "token失效"
+	ResArr[RESPONSENOTOKEN] = "没有token"
 
 }
 

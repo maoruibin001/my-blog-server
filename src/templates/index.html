@@ -6,9 +6,9 @@
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
 </head>
 <body>
-<h1>hello world , i am login</h1>
-<button onclick="getUser()">click</button>
-<button onclick="queryUser()">query</button>
+<h1>user</h1>
+<button onclick="addUser()">add</button>
+<button onclick="deleteUser()">delete</button>
 <button onclick="changeUser()">change</button>
 
 <h1>article</h1>
@@ -22,8 +22,17 @@
 <button onclick="queryComment()">query</button>
 <button onclick="changeComment()">change2</button>
 <button onclick="deleteComment()">delete</button>
+
+<h1>draft</h1>
+
+<button onclick="addDraft()">add2</button>
+<button onclick="queryDraft()">query</button>
+<button onclick="changeDraft()">change</button>
+<button onclick="deleteDraft()">delete</button>
+
+
 <script>
-    function getUser() {
+    function addUser() {
         $.post('/api/user', {
             "name": "maoruibin",
             "password": "123",
@@ -33,7 +42,7 @@
         })
     }
 
-    function queryUser() {
+    function deleteUser() {
         $.ajax({
             url: '/api/user/3242',
             type: 'delete',
@@ -46,7 +55,33 @@
         })
     }
 
+    function changeUser() {
+        $.ajax({
+            url: '/api/user',
+            type: 'patch',
+            data: {
+                aid: '1',
+                title: "34",
+                content: "hello world , i love you "
+            }
+        }, function (result) {
 
+            console.log(result)
+        })
+    }
+
+    function queryUser() {
+        $.ajax({
+            url: '/api/user',
+            type: 'get',
+            data: {
+                aid: 1
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
 
     function addArticle() {
         $.post('/api/article', {
@@ -144,6 +179,55 @@
         })
 
     }
+
+
+    function addDraft() {
+        $.post('/api/draft', {
+            "title": "maoruibin",
+            "tags": "234,856",
+            "content": "18682021295"
+        }, function (res) {
+            console.log(typeof res)
+        })
+    }
+
+    function changeDraft() {
+        $.ajax({
+            url: '/api/draft',
+            type: 'patch',
+            data: {
+                aid: '1',
+                title: "34",
+                content: "hello world , i love you "
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
+    function queryDraft() {
+        $.ajax({
+            url: '/api/drafts',
+            type: 'get',
+            data: {
+
+            }
+        }, function (result) {
+
+            console.log(result)
+        })
+    }
+
+    function deleteDraft() {
+        $.ajax({
+            url: '/api/drafts/1',
+            type: 'delete',
+        }, function (result) {
+            console.log(result)
+        })
+
+    }
+
 </script>
 </body>
 </html>

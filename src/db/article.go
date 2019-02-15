@@ -19,7 +19,11 @@ type ArticleSchema struct {
 	CommentN int `json:"commentN"`
 	DateStr string `json:"dateStr"`
 }
-
+type ResData struct {
+	Articles []ArticleSchema `json:"articles"`
+	Count int `json:"count"`
+	IsEnd int `json:"isEnd"`
+}
 func InsertArticle(data ArticleSchema) ArticleSchema {
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
@@ -41,19 +45,21 @@ func InsertArticle(data ArticleSchema) ArticleSchema {
 
 }
 
-func FindByArtcleId(id int) []ArticleSchema {
-	return ArticleMultiFindByKV("aid", id)
-}
+//func FindByArtcleId(id int) []ArticleSchema {
+//	return ArticleMultiFindByKV("aid", id)
+//}
 
-func ArticleSingleFindByKV(key string, v interface{}) ArticleSchema {
+func ArticleSingleFindByKV(condition bson.M) ArticleSchema {
 
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
 	results := []ArticleSchema{}
 
-	utils.HandleError("find error: ", c.Find(bson.M{key: v}).All(&results))
+	fmt.Println("condition: ", condition)
+	utils.HandleError("find error: ", c.Find(condition).All(&results))
 
+	fmt.Println("result www: ", results)
 	result := ArticleSchema{}
 	if len(results) > 0 {
 		result = results[0]
@@ -61,47 +67,64 @@ func ArticleSingleFindByKV(key string, v interface{}) ArticleSchema {
 	return result
 }
 
-func GetSomeArticles(conditions bson.M, pageSize, pageNo int)  ([]ArticleSchema, error) {
+
+func GetSomeArticles(conditions bson.M, pageSize, pageNo int)  (ResData, error) {
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
+
+	var ret = ResData{}
 	results := []ArticleSchema{}
 	var err error = nil
+
+	count, err := c.Find(conditions).Count()
+
 	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
 
+
 	fmt.Println("results:", results)
-	return results, err
+	ret.Articles = results
+	ret.Count = count
+	if pageNo * pageSize >= count {
+		ret.IsEnd = 1
+	} else {
+		ret.IsEnd = 0
+	}
+	return ret, err
 }
 
 
-func GetArticles(key string, v interface{}, pageSize, pageNo, all int) ([]ArticleSchema, error)  {
+func GetArticles(condition bson.M, pageSize, pageNo int) (ResData, error)  {
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
 	results := []ArticleSchema{}
 	var err error = nil
-	if key == "" {
-		if all == 1 {
-			err = c.Find(nil).All(&results)
-		} else {
-			err = c.Find(nil).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
-		}
-	} else {
-		err = c.Find(bson.M{key: v}).Limit(pageSize).Skip((pageNo - 1) * pageSize).All(&results)
-	}
+	var count = 0
+	var ret = ResData{}
 
+	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).All(&results)
+	count, err = c.Find(condition).Count()
 	fmt.Println("results:", results)
-	return results, err
+
+	ret.Articles = results
+	ret.Count = count
+	if pageNo * pageSize >= count {
+		ret.IsEnd = 1
+	} else {
+		ret.IsEnd = 0
+	}
+	return ret, err
 }
 
-func ArticleMultiFindByKV( key string, v interface{}) []ArticleSchema {
+func ArticleMultiFindByKV(condition bson.M) []ArticleSchema {
 
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
 	results := []ArticleSchema{}
 
-	utils.HandleError("find error: ", c.Find(bson.M{key: v}).All(&results))
+	utils.HandleError("find error: ", c.Find(condition).All(&results))
 
 
 	return results
@@ -136,12 +159,14 @@ func CreateArticle(title string, tags []string, isPublish, comentN int, content 
 	return InsertArticle(m)
 }
 
-func ChangeArticle(aid int, title string, tags []string, isPublish, comentN int, content string) error {
+func ChangeArticle(aid int, title string, tags []string, isPublish bool, comentN int, content string) error {
 	c, session := GetCollect("my-blog-2", "article")
 	defer session.Close()
 
 	selector := bson.M{"aid": aid}
-	data := bson.M{"title": title, "tags": tags, "isPublish": isPublish, "comentN": comentN, "content": content}
+
+	fmt.Println("isPublish", isPublish)
+	data := bson.M{"title": title, "tags": tags, "ispublish": isPublish, "comentn": comentN, "content": content}
 
 	err := c.Update(selector, bson.M{"$set": data})
 

@@ -22,6 +22,7 @@ type UserSchema struct {
 	Phone string `json:"phone"`
 	_id bson.ObjectId
 	Id string `json:"id"`
+	Token string `json:"token"`
 }
 
 func InsertUser(data UserInfo) UserSchema {
