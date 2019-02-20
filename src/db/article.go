@@ -103,7 +103,7 @@ func GetArticles(condition bson.M, pageSize, pageNo int) (ResData, error)  {
 	var count = 0
 	var ret = ResData{}
 
-	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).All(&results)
+	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
 	count, err = c.Find(condition).Count()
 	fmt.Println("results:", results)
 

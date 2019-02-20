@@ -10,12 +10,10 @@ import (
 	"my-blog-server/src/utils"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
-func createDraft(title, tags string, content string) interface{} {
-	tagList := strings.Split(tags, ",")
-	info := db.CreateArticle(title, tagList, 0, 0, content)
+func createDraft(title string, tags []string, content string) interface{} {
+	info := db.CreateArticle(title, tags, 0, 0, content)
 	return info
 }
 func initDraft(router *gin.Engine) {
@@ -23,9 +21,14 @@ func initDraft(router *gin.Engine) {
 	router.POST("/api/draft", middleware.JWTAuth(),func(context *gin.Context) {
 		fmt.Println("create Draft ....")
 
-		title := context.PostForm("title")
-		tags := context.PostForm("tags")
-		content := context.PostForm("content")
+		var article = db.ArticleSchema{}
+		context.BindJSON(&article)
+
+		title := article.Title
+		tags := article.Tags
+		content := article.Content
+
+		fmt.Println("params is: ", title, tags, content)
 
 
 		draftInfo := createDraft(title, tags, content)

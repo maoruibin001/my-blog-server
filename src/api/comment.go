@@ -28,9 +28,9 @@ func initComment(router *gin.Engine) {
 	router.GET("/api/comments", func(context *gin.Context) {
 		aidStr := context.Query("aid")
 
-		fmt.Println("aidStr: ", aidStr)
+		sort := context.Query("sort")
+		fmt.Println("sort: ", sort)
 		aid, err := strconv.Atoi(aidStr)
-
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, gin.H{
 				"errorMsg": "aid错误，请输入正确的aid: " + aidStr,
@@ -38,6 +38,7 @@ func initComment(router *gin.Engine) {
 			return
 
 		}
+
 		comments, err := db.QueryCommentSet(aid)
 
 		if err != nil {
