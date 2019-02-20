@@ -17,6 +17,17 @@ func createUser(name, age, phone, password string) interface{} {
 	userInfo := db.CreateUser(name, age, phone, pw, salt)
 	return userInfo
 }
+
+func init() {
+	c, session := db.GetCollect("my-blog-2", "user")
+	defer session.Close()
+	count, err := c.Count()
+	utils.HandleError("查找错误：", err)
+	if count == 0 {
+		fmt.Println("用户数据库为空，初始化数据...")
+		createUser("mao", "20", "123", "123")
+	}
+}
 func initUser(router *gin.Engine) {
 	//创建新用户
 	router.POST("/api/user", func(context *gin.Context) {

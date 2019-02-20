@@ -2,36 +2,39 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"my-blog-server/src/config"
+	"net/http"
+	"strings"
 	"time"
 )
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//token := c.DefaultQuery("token", "")
-		//if token == "" {
-		//	token = c.Request.Header.Get("Authorization")
-		//	if s := strings.Split(token, " "); len(s) == 2 {
-		//		token = s[1]
-		//	}
-		//}
-		//
-		//fmt.Println("token is: ", token)
-		//j := NewJWT()
-		//claims, err := j.ParseToken(token)
-		//if err != nil {
-		//	if err == TokenExpired {
-		//		if token, err = j.RefreshToken(token); err == nil {
-		//			c.Header("Authorization", "Bear "+token)
-		//			c.JSON(http.StatusOK, gin.H{"error": 0, "message": "refresh token", "token": token})
-		//			return
-		//		}
-		//	}
-		//	c.JSON(http.StatusUnauthorized, gin.H{"error": 1, "message": err.Error()})
-		//	return
-		//}
-		//c.Set("claims", claims)
+		token := c.DefaultQuery("token", "")
+		if token == "" {
+			token = c.Request.Header.Get("Authorization")
+			if s := strings.Split(token, " "); len(s) == 2 {
+				token = s[1]
+			}
+		}
+
+		fmt.Println("token is: ", token)
+		j := NewJWT()
+		claims, err := j.ParseToken(token)
+		if err != nil {
+			if err == TokenExpired {
+				if token, err = j.RefreshToken(token); err == nil {
+					c.Header("Authorization", "Bear "+token)
+					c.JSON(http.StatusOK, gin.H{"error": 0, "message": "refresh token", "token": token})
+					return
+				}
+			}
+			c.JSON(http.StatusUnauthorized, gin.H{"error": 1, "message": err.Error()})
+			return
+		}
+		c.Set("claims", claims)
 	}
 }
 type JWT struct {

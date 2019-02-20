@@ -7,9 +7,9 @@ import (
 
 func main() {
 	router := gin.Default()
-	router.LoadHTMLGlob("src/templates/*")
+	router.LoadHTMLGlob("/Users/ruibin/go/src/my-blog-server/src/templates/*")
 	router.Use(gin.Logger())
 	//router.Use(middle())
 	api.InitRouter(router)
-	router.Run(":3433")
+	router.Run(":8082")
 }

@@ -117,17 +117,18 @@ func RemoveUser(k string, v interface{}) error {
 
 	return err
 }
-func InitUserData()  {
-	c, session := GetCollect("my-blog-2", "user")
-	defer session.Close()
-	count, err := c.Count()
-	utils.HandleError("查找错误：", err)
-	if count == 0 {
-		fmt.Println("数据库为空，初始化数据...")
-		//var i int
-		//for i = 0; i < 10; i ++ {
-		//	//InsertUser(UserInfo{"mao", i, strconv.Itoa(i)})
-		//}
-
-	}
-}
+//func InitUserData()  {
+//	c, session := GetCollect("my-blog-2", "user")
+//	defer session.Close()
+//	count, err := c.Count()
+//	utils.HandleError("查找错误：", err)
+//	if count == 0 {
+//		fmt.Println("数据库为空，初始化数据...")
+//		//Name string `json:"name"`
+//		//Age  string    `json:"age"`
+//		//Salt string
+//		//Password string `json:"password"`
+//		//Phone string `json:"phone"`
+//		InsertUser(UserInfo{"mao", "20", "", "123", "123"})
+//	}
+//}
