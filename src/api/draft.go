@@ -59,7 +59,7 @@ func initDraft(router *gin.Engine) {
 		}
 	})
 	//修改草稿
-	router.PATCH("/api/drafts/:aid",middleware.JWTAuth(), func(context *gin.Context) {
+	router.PUT("/api/drafts/:aid",middleware.JWTAuth(), func(context *gin.Context) {
 
 		var article = db.ArticleSchema{}
 		context.BindJSON(&article)

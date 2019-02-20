@@ -69,7 +69,7 @@ func initComment(router *gin.Engine) {
 	})
 
 	// 更新评论的点赞数
-	router.PATCH("/api/comments/:aid/:cid", func(context *gin.Context) {
+	router.PUT("/api/comments/:aid/:cid", func(context *gin.Context) {
 
 		aidStr := context.Param("aid")
 		cidStr := context.Param("cid")

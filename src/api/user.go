@@ -73,7 +73,7 @@ func initUser(router *gin.Engine) {
 		}
 	})
 	//修改用户
-	router.PATCH("/api/user", func(context *gin.Context) {
+	router.PUT("/api/user", func(context *gin.Context) {
 		context.Request.ParseForm()
 
 		user := db.UserSchema{}

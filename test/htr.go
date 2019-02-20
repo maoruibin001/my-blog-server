@@ -17,4 +17,6 @@ func main() {
 	var a []string
 
 	fmt.Println(len(a))
+
+	fmt.Println("$pwd")
 }
