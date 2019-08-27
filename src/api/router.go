@@ -10,6 +10,7 @@ import (
 
 func InitRouter(router *gin.Engine) {
 
+	initImage(router)
 	initComment(router)
 	initDraft(router)
 	initTag(router)

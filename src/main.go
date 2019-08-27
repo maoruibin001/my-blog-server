@@ -11,5 +11,5 @@ func main() {
 	router.Use(gin.Logger())
 	//router.Use(middle())
 	api.InitRouter(router)
-	router.Run(":8082")
+	router.Run(":3443")
 }
