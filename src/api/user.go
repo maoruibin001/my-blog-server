@@ -3,9 +3,9 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"my-blog-server/src/config"
-	"my-blog-server/src/db"
-	"my-blog-server/src/utils"
+	"album-server/src/config"
+	"album-server/src/db"
+	"album-server/src/utils"
 	"net/http"
 )
 //TODO: 需要一个用户信息返回过滤函数。

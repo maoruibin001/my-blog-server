@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/mgo.v2"
-	"my-blog-server/src/utils"
+	"album-server/src/utils"
 	"net/http"
 )
 

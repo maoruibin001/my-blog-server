@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"my-blog-server/src/db"
-	"my-blog-server/src/middleware"
-	"my-blog-server/src/utils"
+	"album-server/src/db"
+	"album-server/src/middleware"
+	"album-server/src/utils"
 	"net/http"
 )
 

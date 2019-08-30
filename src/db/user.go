@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"my-blog-server/src/utils"
+	"album-server/src/utils"
 )
 
 type UserInfo struct {

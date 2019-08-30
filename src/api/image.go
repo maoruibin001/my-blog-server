@@ -1,31 +1,28 @@
 package api
 
 import (
-	"fmt"
+	"album-server/src/middleware"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"io/ioutil"
-	"my-blog-server/src/db"
-	"my-blog-server/src/utils"
-	)
+	"net/http/httputil"
+)
+
+
+const Host  = "0.0.0.0:3433"
+
+var simpleHostProxy = httputil.ReverseProxy{
+	Director: func(req *http.Request) {
+		req.URL.Scheme = "http"
+		req.URL.Host = Host
+		req.Host = Host
+	},
+}
+func WithHeader(ctx *gin.Context) {
+	ctx.Request.Header.Add("requester-uid", "id")
+	simpleHostProxy.ServeHTTP(ctx.Writer, ctx.Request)
+}
 
 func initImage(router *gin.Engine) {
-	router.POST("/api/upload", func(context *gin.Context) {
-		response,err := http.Get("http://www.baidu.com")
-		if(err!=nil){
-			fmt.Println(err)
-		}
-		defer response.Body.Close()
-		body,err := ioutil.ReadAll(response.Body)
-		fmt.Println(string(body))
-
-		tags, err := db.GetTags()
-
-		fmt.Println("tags is: ", tags)
-		if err != nil {
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSESERVERERROR, nil)
-		} else {
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, tags)
-		}
-	})
+	vi := router.Group("/api/upload", middleware.ImageRes())
+	vi.Any("/image", WithHeader)
 }

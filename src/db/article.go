@@ -5,7 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"log"
-	"my-blog-server/src/utils"
+	"album-server/src/utils"
 	"time"
 )
 

@@ -100,6 +100,7 @@ func ResponseJson(context *gin.Context, code, retCode int, data interface{})  {
 	}
 
 	log.Println(code, retCode)
+	fmt.Println("data", data)
 	context.JSON(code, result)
 }
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"my-blog-server/src/config"
+	"album-server/src/config"
 	"net/http"
 	"strings"
 	"time"

@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"my-blog-server/src/db"
-	"my-blog-server/src/utils"
+	"album-server/src/db"
+	"album-server/src/utils"
 	"net/http"
 	"strconv"
 )
@@ -11,12 +11,13 @@ import (
 func InitRouter(router *gin.Engine) {
 
 	initImage(router)
-	initComment(router)
-	initDraft(router)
-	initTag(router)
-	initUser(router)
-	initLogin(router)
-	initArticle(router)
+	initProduct(router)
+	//initComment(router)
+	//initDraft(router)
+	//initTag(router)
+	//initUser(router)
+	//initLogin(router)
+	//initArticle(router)
 
 
 	router.GET("/", func(context *gin.Context) {

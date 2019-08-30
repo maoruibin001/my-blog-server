@@ -2,6 +2,6 @@ package config
 
 const (
 	Salt = "ruibinmao"
-	DEFAULTPAGESIZI = "8"
+	DEFAULTPAGESIZI = "800"
 	DEFAULTPAGENO = "1"
 )
