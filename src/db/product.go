@@ -187,7 +187,8 @@ func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pI
 
 	selector := bson.M{"id": id}
 
-	data := bson.M{"name": name,"descImg": descImg,"descImgThumb": descImgThumb,"gifImg": gifImg, "originFile": originFile, "prize": prize, "pId": pId, "mainImgList": mainImgList}
+	//data := bson.M{"name": name,"descImg": descImg,"descImgThumb": descImgThumb,"gifImg": gifImg, "originFile": originFile, "prize": prize, "pId": pId, "mainImgList": mainImgList}
+	data := bson.M{"name": name,"descimg": descImg,"descimgthumb": descImgThumb,"gifimg": gifImg, "originfile": originFile, "prize": prize, "pid": pId, "mainimglist": mainImgList}
 
 	err := c.Update(selector, bson.M{"$set": data})
 

@@ -2,26 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="07acdffc-eb86-4e6f-9389-494e38d7fbc5" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/api/product.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/db/product.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/middleware/image.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/article.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/article.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/draft.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/draft.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/image.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/image.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/login.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/tag.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/tag.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/article.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/article.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/db/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/middleware/token.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/middleware/token.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/utils.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/product.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/product.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/product.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/product.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -109,12 +91,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="go" value="1922" />
+          <entry key="go" value="1978" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Go" value="1922" />
+          <entry key="Go" value="1978" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.go.postfix.template.usages.trigger">
@@ -156,11 +138,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/db/product.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="129" column="21" lean-forward="true" selection-start-line="129" selection-start-column="21" selection-end-line="129" selection-end-column="21" />
+            <state relative-caret-position="150">
+              <caret line="194" selection-start-line="194" selection-end-line="194" />
               <folding>
                 <element signature="e#12#113#0" expanded="true" />
               </folding>
@@ -198,11 +180,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/api/product.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1286">
-              <caret line="69" column="10" selection-start-line="69" selection-start-column="10" selection-end-line="69" selection-end-column="10" />
+            <state relative-caret-position="-920">
+              <caret line="165" column="45" lean-forward="true" selection-start-line="165" selection-start-column="45" selection-end-line="165" selection-end-column="45" />
               <folding>
                 <element signature="e#13#212#0" expanded="true" />
               </folding>
@@ -240,8 +222,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Sort</find>
-      <find>C.</find>
       <find>initComment</find>
       <find>httputils</find>
       <find>my-blog-server</find>
@@ -268,8 +248,10 @@
       <find>mainImgList</find>
       <find>gifImg</find>
       <find>/api/upload</find>
-      <find>文章不存在</find>
       <find>RESPONSENOARTICLE</find>
+      <find>文章不存在</find>
+      <find>bson.M</find>
+      <find>fmt.</find>
     </findStrings>
     <replaceStrings>
       <replace>Draft</replace>
@@ -334,8 +316,8 @@
         <option value="$PROJECT_DIR$/src/api/router.go" />
         <option value="$PROJECT_DIR$/src/utils/utils.go" />
         <option value="$PROJECT_DIR$/src/config/config.go" />
-        <option value="$PROJECT_DIR$/src/db/product.go" />
         <option value="$PROJECT_DIR$/src/api/product.go" />
+        <option value="$PROJECT_DIR$/src/db/product.go" />
       </list>
     </option>
   </component>
@@ -511,12 +493,12 @@
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.29756796" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.29756796" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32891566" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49785408" visible="true" weight="0.3325301" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49785408" visible="true" weight="0.3325301" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -842,13 +824,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/config/config.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="26" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/api/router.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
@@ -860,16 +835,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="117">
           <caret line="161" column="5" selection-start-line="161" selection-start-column="5" selection-end-line="161" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/db/product.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="129" column="21" lean-forward="true" selection-start-line="129" selection-start-column="21" selection-end-line="129" selection-end-column="21" />
-          <folding>
-            <element signature="e#12#113#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -904,12 +869,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/config/config.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="26" selection-start-line="4" selection-start-column="26" selection-end-line="4" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/api/product.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1286">
-          <caret line="69" column="10" selection-start-line="69" selection-start-column="10" selection-end-line="69" selection-end-column="10" />
+        <state relative-caret-position="-920">
+          <caret line="165" column="45" lean-forward="true" selection-start-line="165" selection-start-column="45" selection-end-line="165" selection-end-column="45" />
           <folding>
             <element signature="e#13#212#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/db/product.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="194" selection-start-line="194" selection-end-line="194" />
+          <folding>
+            <element signature="e#12#113#0" expanded="true" />
           </folding>
         </state>
       </provider>

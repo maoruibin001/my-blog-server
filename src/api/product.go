@@ -68,7 +68,7 @@ func initProduct(router *gin.Engine) {
 		}
 	})
 	//修改产品
-	router.PUT("/api/product/:id",middleware.JWTAuth(), func(context *gin.Context) {
+	router.PUT("/api/product/:id", func(context *gin.Context) {
 
 		var product = db.ProductSchema{}
 		context.ShouldBind(&product)
@@ -87,7 +87,6 @@ func initProduct(router *gin.Engine) {
 		id := product.Id
 		mainImgList := product.MainImgList
 
-		fmt.Println("params is: ",name,descImg,descImgThumb,gifImg,originFile, prize, pId, mainImgList)
 		idStr := context.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
