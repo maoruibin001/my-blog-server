@@ -96,7 +96,7 @@ func GetSomeProducts(conditions bson.M, pageSize, pageNo int)  (RetData, error) 
 
 	count, err := c.Find(conditions).Count()
 
-	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
+	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-modifydate").All(&results)
 
 
 	fmt.Println("results:", results)
@@ -120,7 +120,8 @@ func GetProducts(condition bson.M, pageSize, pageNo int) (RetData, error)  {
 	var count = 0
 	var ret = RetData{}
 
-	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-date").All(&results)
+	fmt.Println("condition:", condition)
+	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-modifydate").All(&results)
 	count, err = c.Find(condition).Count()
 	fmt.Println("results:", results)
 
@@ -186,9 +187,11 @@ func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pI
 	defer session.Close()
 
 	selector := bson.M{"id": id}
+	modifyDate := time.Now().UnixNano() / 1e6
+	modifyDateStr := time.Now().Format("2006年01月02日 15时04分05秒")
 
 	//data := bson.M{"name": name,"descImg": descImg,"descImgThumb": descImgThumb,"gifImg": gifImg, "originFile": originFile, "prize": prize, "pId": pId, "mainImgList": mainImgList}
-	data := bson.M{"name": name,"descimg": descImg,"descimgthumb": descImgThumb,"gifimg": gifImg, "originfile": originFile, "prize": prize, "pid": pId, "mainimglist": mainImgList}
+	data := bson.M{"name": name,"descimg": descImg,"descimgthumb": descImgThumb,"gifimg": gifImg, "originfile": originFile, "prize": prize, "pid": pId, "mainimglist": mainImgList, "modifydate":modifyDate, "modifydatestr":modifyDateStr}
 
 	err := c.Update(selector, bson.M{"$set": data})
 

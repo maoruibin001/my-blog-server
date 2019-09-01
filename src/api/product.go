@@ -61,6 +61,10 @@ func initProduct(router *gin.Engine) {
 		product := db.ProductSingleFindByKV(bson.M{"id": id})
 
 		fmt.Println("product: ", product)
+		var childProducts db.RetData
+		childProducts, err = db.GetProducts(bson.M{"pid": product.Id}, 1000, 1)
+		//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
+		product.Children = childProducts.Products
 		if product.Id == id && id != 0{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, product)
 		} else {
@@ -182,9 +186,13 @@ func initProduct(router *gin.Engine) {
 		var childProducts db.RetData
 
 		fmt.Println("pId is: ", pId)
-		if pId != "" && pId != "全部"{
-			products, err = db.GetProducts(bson.M{"pid": pId}, pageSize, pageNo)
-		} else {
+		if pId != "" && pId != "-100"{
+			_pId, err := strconv.Atoi(pId)
+			if err != nil {
+				fmt.Println("err: ", err)
+			}
+			products, err = db.GetProducts(bson.M{"pid": _pId}, pageSize, pageNo)
+		} else if pId == ""{
 			products, err = db.GetProducts(bson.M{"pid": -1}, pageSize, pageNo)
 			for i:=0; i < len(products.Products);i ++ {
 				fmt.Println("helo: ", )
@@ -192,6 +200,8 @@ func initProduct(router *gin.Engine) {
 				//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
 				products.Products[i].Children = childProducts.Products
 			}
+		} else {
+			products, err = db.GetProducts(bson.M{}, pageSize, pageNo)
 		}
 
 		fmt.Println("products:", products)
