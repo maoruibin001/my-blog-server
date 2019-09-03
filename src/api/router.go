@@ -10,6 +10,8 @@ import (
 
 func InitRouter(router *gin.Engine) {
 
+	initBseries(router)
+	initLseries(router)
 	initImage(router)
 	initProduct(router)
 	//initComment(router)

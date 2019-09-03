@@ -25,4 +25,8 @@ func WithHeader(ctx *gin.Context) {
 func initImage(router *gin.Engine) {
 	vi := router.Group("/api/upload", middleware.ImageRes())
 	vi.Any("/image", WithHeader)
+	vi.Any("/file", WithHeader)
+	vu := router.Group("/api/download", middleware.ImageRes())
+	vu.Any("/image", WithHeader)
+	vu.Any("/file", WithHeader)
 }

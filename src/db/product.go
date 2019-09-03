@@ -13,10 +13,16 @@ type ImgInfoSchema struct {
 	ThumbUrl string `json:"thumbUrl"`
 	Url string `json:"url"`
 }
+type ProductMoveSchema struct {
+	Start int `json:"start"`
+	End int `json:"end"`
+	Seq int `json:"seq"`
+}
 
 type ProductSchema struct {
 	Id int `json:"id"`
-	PId int `json:"pId"`
+	LId int `json:"lId"`
+	Seq int `json:"seq"`
 	DescImg  string    `json:"descImg"`
 	DescImgThumb string	 `json:"descImgThumb"`
 	//GifImgThumb  string    `json:"gifImgThumb"`
@@ -29,7 +35,7 @@ type ProductSchema struct {
 	CreateDateStr string `json:"createDateStr"`
 	ModifyDate int64 `json:"modifyDate"`
 	ModifyDateStr string `json:"modifyDateStr"`
-	Children []ProductSchema `json:"children"`
+	//Children []ProductSchema `json:"children"`
 }
 type RetData struct {
 	Products []ProductSchema `json:"products"`
@@ -41,7 +47,8 @@ func InsertProduct(data ProductSchema) ProductSchema {
 	defer session.Close()
 	m := ProductSchema{}
 	m.Id = data.Id
-	m.PId = data.PId
+	m.Seq = data.Seq
+	m.LId = data.LId
 	m.Name = data.Name
 	m.DescImg = data.DescImg
 	m.DescImgThumb = data.DescImgThumb
@@ -96,7 +103,7 @@ func GetSomeProducts(conditions bson.M, pageSize, pageNo int)  (RetData, error) 
 
 	count, err := c.Find(conditions).Count()
 
-	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-modifydate").All(&results)
+	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-seq").All(&results)
 
 
 	fmt.Println("results:", results)
@@ -121,7 +128,7 @@ func GetProducts(condition bson.M, pageSize, pageNo int) (RetData, error)  {
 	var ret = RetData{}
 
 	fmt.Println("condition:", condition)
-	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-modifydate").All(&results)
+	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("seq").All(&results)
 	count, err = c.Find(condition).Count()
 	fmt.Println("results:", results)
 
@@ -164,10 +171,11 @@ func generationId() int {
 	log.Println("doc:", doc)
 	return doc.Id
 }
-func CreateProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pId int, mainImgList []ImgInfoSchema) ProductSchema {
+func CreateProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId int, mainImgList []ImgInfoSchema) ProductSchema {
 	m := ProductSchema{}
 	m.Id = generationId()
-	m.PId = pId
+	m.Seq = generationNameId("pId")
+	m.LId = lId
 	m.Name = name
 	m.DescImg = descImg
 	m.DescImgThumb = descImgThumb
@@ -182,7 +190,7 @@ func CreateProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pI
 	return InsertProduct(m)
 }
 
-func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pId,id int, mainImgList []ImgInfoSchema) error {
+func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId,id int, mainImgList []ImgInfoSchema, seq int) error {
 	c, session := GetCollect("album", "product")
 	defer session.Close()
 
@@ -190,8 +198,8 @@ func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pI
 	modifyDate := time.Now().UnixNano() / 1e6
 	modifyDateStr := time.Now().Format("2006年01月02日 15时04分05秒")
 
-	//data := bson.M{"name": name,"descImg": descImg,"descImgThumb": descImgThumb,"gifImg": gifImg, "originFile": originFile, "prize": prize, "pId": pId, "mainImgList": mainImgList}
-	data := bson.M{"name": name,"descimg": descImg,"descimgthumb": descImgThumb,"gifimg": gifImg, "originfile": originFile, "prize": prize, "pid": pId, "mainimglist": mainImgList, "modifydate":modifyDate, "modifydatestr":modifyDateStr}
+	//data := bson.M{"name": name,"descImg": descImg,"descImgThumb": descImgThumb,"gifImg": gifImg, "originFile": originFile, "prize": prize, "lId": lId, "mainImgList": mainImgList}
+	data := bson.M{"name": name,"descimg": descImg,"descimgthumb": descImgThumb,"gifimg": gifImg, "originfile": originFile, "prize": prize, "lid": lId, "mainimglist": mainImgList, "modifydate":modifyDate, "modifydatestr":modifyDateStr, "seq": seq}
 
 	err := c.Update(selector, bson.M{"$set": data})
 

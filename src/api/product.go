@@ -12,8 +12,8 @@ import (
 	"strconv"
 )
 
-func createProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, pId int, mainImgList []db.ImgInfoSchema) interface{} {
-	info := db.CreateProduct(name,descImg,descImgThumb,gifImg,originFile, prize, pId, mainImgList)
+func createProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId int, mainImgList []db.ImgInfoSchema) interface{} {
+	info := db.CreateProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, mainImgList)
 	return info
 }
 func initProduct(router *gin.Engine) {
@@ -30,18 +30,54 @@ func initProduct(router *gin.Engine) {
 		gifImg := product.GifImg
 		originFile := product.OriginFile
 		prize := product.Prize
-		pId := product.PId
+		lId := product.LId
 		mainImgList := product.MainImgList
 
-		fmt.Println("params is: ",name,descImg,descImgThumb,gifImg,originFile, prize, pId, mainImgList)
+		fmt.Println("params is: ",name,descImg,descImgThumb,gifImg,originFile, prize, lId, mainImgList)
 
 
-		productInfo := createProduct(name,descImg,descImgThumb,gifImg,originFile, prize, pId, mainImgList)
+		productInfo := createProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, mainImgList)
 
 		fmt.Println("productInfo: ", productInfo)
 		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, productInfo)
 	})
 
+
+	//创建大系列
+	router.POST("/api/product/move", func(context *gin.Context) {
+		fmt.Println("move product ....")
+
+		var lseries = db.ProductMoveSchema{}
+		context.ShouldBind(&lseries)
+
+		startId := lseries.Start
+		endId := lseries.End
+		var err error
+		start := db.ProductSingleFindByKV(bson.M{"id": startId})
+		end := db.ProductSingleFindByKV(bson.M{"id": endId})
+		fmt.Println(start, end)
+
+		err = db.ChangeProduct(start.Name,start.DescImg,start.DescImgThumb,start.GifImg,start.OriginFile, start.Prize, start.LId, start.Id, start.MainImgList, end.Seq)
+
+		if err != nil {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, gin.H{
+				"errorMsg": "移动错误，请重试: ",
+			})
+			return
+
+		}
+		err = db.ChangeProduct(end.Name,end.DescImg,end.DescImgThumb,end.GifImg,end.OriginFile, end.Prize, end.LId, end.Id, end.MainImgList, start.Seq)
+
+		if err != nil {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, gin.H{
+				"errorMsg": "移动错误，请重试: ",
+			})
+			return
+
+		}
+
+		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, nil)
+	})
 	//查询产品信息
 
 	router.GET("/api/product/:id", func(context *gin.Context) {
@@ -61,10 +97,6 @@ func initProduct(router *gin.Engine) {
 		product := db.ProductSingleFindByKV(bson.M{"id": id})
 
 		fmt.Println("product: ", product)
-		var childProducts db.RetData
-		childProducts, err = db.GetProducts(bson.M{"pid": product.Id}, 1000, 1)
-		//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
-		product.Children = childProducts.Products
 		if product.Id == id && id != 0{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, product)
 		} else {
@@ -87,7 +119,7 @@ func initProduct(router *gin.Engine) {
 		gifImg := product.GifImg
 		originFile := product.OriginFile
 		prize := product.Prize
-		pId := product.PId
+		lId := product.LId
 		id := product.Id
 		mainImgList := product.MainImgList
 
@@ -118,7 +150,7 @@ func initProduct(router *gin.Engine) {
 		//	tags = draft.Tags
 		//}
 
-		err = db.ChangeProduct(name,descImg,descImgThumb,gifImg,originFile, prize, pId,id, mainImgList)
+		err = db.ChangeProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId,id, mainImgList, oldProduct.Seq)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEUPDATEERROR, nil)
@@ -168,7 +200,7 @@ func initProduct(router *gin.Engine) {
 		pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
 
 		fmt.Println("pageSizeStr", pageNoStr)
-		pId := context.Query("pId")
+		lId := context.Query("lId")
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
 		if err != nil {
@@ -183,24 +215,20 @@ func initProduct(router *gin.Engine) {
 
 		fmt.Println("pagesize: ", pageSize, pageNo)
 		var products db.RetData
-		var childProducts db.RetData
+		//var childProducts db.RetData
 
-		fmt.Println("pId is: ", pId)
-		if pId != "" && pId != "-100"{
-			_pId, err := strconv.Atoi(pId)
+		fmt.Println("lId is: ", lId)
+		if lId != "" && lId != "-100"{
+			_lId, err := strconv.Atoi(lId)
 			if err != nil {
 				fmt.Println("err: ", err)
 			}
-			products, err = db.GetProducts(bson.M{"pid": _pId}, pageSize, pageNo)
-		} else if pId == ""{
-			products, err = db.GetProducts(bson.M{"pid": -1}, pageSize, pageNo)
-			for i:=0; i < len(products.Products);i ++ {
-				fmt.Println("helo: ", )
-				childProducts, err = db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
-				//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
-				products.Products[i].Children = childProducts.Products
-			}
-		} else {
+			products, err = db.GetProducts(bson.M{"lid": _lId}, pageSize, pageNo)
+			fmt.Println("products22:", products)
+		} else if lId == ""{
+			products, err = db.GetProducts(bson.M{}, pageSize, pageNo)
+
+		} else  {
 			products, err = db.GetProducts(bson.M{}, pageSize, pageNo)
 		}
 
