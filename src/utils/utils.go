@@ -19,7 +19,7 @@ func initResCode() {
 	ResArr[RESPONSEUNLOGIN] = "用户未登陆"
 	ResArr[RESPONSENOUSER] = "用户不存在"
 	ResArr[RESPONSEUSEREXSIST] = "此用户已存在"
-	ResArr[RESPONSENOARTICLE] = "文章不存在"
+	ResArr[RESPONSENOARTICLE] = "内容不存在"
 	ResArr[RESPONSEPARAMERROR] = "请求参数错误"
 	ResArr[RESPONSESERVERERROR] = "操作有误"
 	ResArr[RESPONSEUPDATEERROR] = "数据更新失败"

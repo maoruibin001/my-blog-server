@@ -134,7 +134,6 @@ func ChangeBseries(id int, name string, seq int) error {
 	modifyDate := time.Now().UnixNano() / 1e6
 	modifyDateStr := time.Now().Format("2006年01月02日 15时04分05秒")
 
-	//data := bson.M{"name": name,"descImg": descImg,"descImgThumb": descImgThumb,"gifImg": gifImg, "originFile": originFile, "prize": prize, "pId": pId, "mainImgList": mainImgList}
 	data := bson.M{"name": name, "seq": seq, "modifydate":modifyDate, "modifydatestr":modifyDateStr}
 
 	err := c.Update(selector, bson.M{"$set": data})
@@ -146,7 +145,7 @@ func RemoveBseries(k string, v interface{}) error {
 	c, session := GetCollect("album", "bseries")
 	defer session.Close()
 
-	err := c.Remove(bson.M{k: v})
+	_, err := c.RemoveAll(bson.M{k: v})
 
 	return err
 }

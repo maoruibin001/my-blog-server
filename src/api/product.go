@@ -12,8 +12,8 @@ import (
 	"strconv"
 )
 
-func createProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId int, mainImgList []db.ImgInfoSchema) interface{} {
-	info := db.CreateProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, mainImgList)
+func createProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId, bId int, mainImgList []db.ImgInfoSchema) interface{} {
+	info := db.CreateProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, bId, mainImgList)
 	return info
 }
 func initProduct(router *gin.Engine) {
@@ -35,8 +35,18 @@ func initProduct(router *gin.Engine) {
 
 		fmt.Println("params is: ",name,descImg,descImgThumb,gifImg,originFile, prize, lId, mainImgList)
 
+		ret, err := db.GetLserieses(bson.M{"lid": lId}, 10, 1)
 
-		productInfo := createProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, mainImgList)
+		if err != nil || len(ret.Lseries) != 1 {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, gin.H{
+				"errorMsg": "lid不存在，请传入正确的lid: ",
+			})
+			return
+
+		}
+		bId := ret.Lseries[0].BId
+
+		productInfo := createProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, bId, mainImgList)
 
 		fmt.Println("productInfo: ", productInfo)
 		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, productInfo)
@@ -176,7 +186,7 @@ func initProduct(router *gin.Engine) {
 		//查询用户
 		product := db.ProductSingleFindByKV(bson.M{"id": id})
 
-		if product.Id != id || id == 0 {
+		if product.Id != id {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOARTICLE, nil)
 			return
 		}
@@ -218,7 +228,7 @@ func initProduct(router *gin.Engine) {
 		//var childProducts db.RetData
 
 		fmt.Println("lId is: ", lId)
-		if lId != "" && lId != "-100"{
+		if lId != "" && lId != "-100" && lId != "0" {
 			_lId, err := strconv.Atoi(lId)
 			if err != nil {
 				fmt.Println("err: ", err)

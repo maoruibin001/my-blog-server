@@ -22,6 +22,7 @@ type ProductMoveSchema struct {
 type ProductSchema struct {
 	Id int `json:"id"`
 	LId int `json:"lId"`
+	BId int `json:"bId"`
 	Seq int `json:"seq"`
 	DescImg  string    `json:"descImg"`
 	DescImgThumb string	 `json:"descImgThumb"`
@@ -45,27 +46,27 @@ type RetData struct {
 func InsertProduct(data ProductSchema) ProductSchema {
 	c, session := GetCollect("album", "product")
 	defer session.Close()
-	m := ProductSchema{}
-	m.Id = data.Id
-	m.Seq = data.Seq
-	m.LId = data.LId
-	m.Name = data.Name
-	m.DescImg = data.DescImg
-	m.DescImgThumb = data.DescImgThumb
-	m.GifImg = data.GifImg
-	m.OriginFile = data.OriginFile
-	m.Prize = data.Prize
-	m.MainImgList = data.MainImgList
-	m.CreateDate = data.CreateDate
-	m.CreateDateStr = data.CreateDateStr
-	m.ModifyDate = data.ModifyDate
-	m.ModifyDateStr = data.ModifyDateStr
+	// m := ProductSchema{}
+	// m.Id = data.Id
+	// m.Seq = data.Seq
+	// m.LId = data.LId
+	// m.Name = data.Name
+	// m.DescImg = data.DescImg
+	// m.DescImgThumb = data.DescImgThumb
+	// m.GifImg = data.GifImg
+	// m.OriginFile = data.OriginFile
+	// m.Prize = data.Prize
+	// m.MainImgList = data.MainImgList
+	// m.CreateDate = data.CreateDate
+	// m.CreateDateStr = data.CreateDateStr
+	// m.ModifyDate = data.ModifyDate
+	// m.ModifyDateStr = data.ModifyDateStr
 
 
-	utils.HandleError("insert error: ", c.Insert(&m))
-	fmt.Println("插入一条数据", m)
+	utils.HandleError("insert error: ", c.Insert(&data))
+	fmt.Println("插入一条数据", data)
 
-	return m
+	return data
 
 }
 
@@ -171,11 +172,12 @@ func generationId() int {
 	log.Println("doc:", doc)
 	return doc.Id
 }
-func CreateProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId int, mainImgList []ImgInfoSchema) ProductSchema {
+func CreateProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId, bId int, mainImgList []ImgInfoSchema) ProductSchema {
 	m := ProductSchema{}
 	m.Id = generationId()
 	m.Seq = generationNameId("pId")
 	m.LId = lId
+	m.BId = bId
 	m.Name = name
 	m.DescImg = descImg
 	m.DescImgThumb = descImgThumb
@@ -210,7 +212,10 @@ func RemoveProduct(k string, v interface{}) error {
 	c, session := GetCollect("album", "product")
 	defer session.Close()
 
-	err := c.Remove(bson.M{k: v})
+	_, err := c.RemoveAll(bson.M{k: v})
+
+
+	fmt.Println("删除产品", err)
 
 	return err
 }
@@ -221,10 +226,5 @@ func IniProductData()  {
 	utils.HandleError("查找错误：", err)
 	if count == 0 {
 		fmt.Println("数据库为空，初始化数据...")
-		//var i int
-		//for i = 0; i < 10; i ++ {
-		//	//InsertUser(UserInfo{"mao", i, strconv.Itoa(i)})
-		//}
-
 	}
 }

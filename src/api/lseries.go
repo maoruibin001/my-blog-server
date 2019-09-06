@@ -91,8 +91,8 @@ func initLseries(router *gin.Engine) {
 
 		fmt.Println("result: ", result)
 		var childLseries db.LRetData
-		childLseries, err = db.GetLserieses(bson.M{"pid": result.LId}, 1000, 1)
-		//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
+		childLseries, err = db.GetLserieses(bson.M{"bid": result.LId}, 1000, 1)
+
 		result.Children = childLseries.Lseries
 		if result.LId == id && id != 0{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, result)
@@ -166,6 +166,7 @@ func initLseries(router *gin.Engine) {
 				"message": "删除失败"	,
 			})
 		} else {
+			db.RemoveProduct("lid", id)
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, nil)
 		}
 	})
@@ -178,7 +179,7 @@ func initLseries(router *gin.Engine) {
 		pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
 
 		fmt.Println("pageSizeStr", pageNoStr)
-		pId := context.Query("id")
+		lId := context.Query("id")
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
 		if err != nil {
@@ -195,21 +196,20 @@ func initLseries(router *gin.Engine) {
 		var lserieses db.LRetData
 		var childLserieses db.LRetData
 
-		fmt.Println("pId is: ", pId)
-		if pId != "all" {
+		fmt.Println("lId is: ", lId)
+		if lId != "all" {
 			lserieses, err = db.GetLserieses(bson.M{}, pageSize, pageNo)
-		} else if pId != "" {
-			_pId, err := strconv.Atoi(pId)
+		} else if lId != "" {
+			_lId, err := strconv.Atoi(lId)
 			if err != nil {
 				fmt.Println("err: ", err)
 			}
-			lserieses, err = db.GetLserieses(bson.M{"pid": _pId}, pageSize, pageNo)
+			lserieses, err = db.GetLserieses(bson.M{"bid": _lId}, pageSize, pageNo)
 		} else {
 			lserieses, err = db.GetLserieses(bson.M{}, pageSize, pageNo)
 			for i:=0; i < len(lserieses.Lseries);i ++ {
 				fmt.Println("helo: ", )
-				childLserieses, err = db.GetLserieses(bson.M{"pid": lserieses.Lseries[i].BId}, pageSize, pageNo)
-				//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
+				childLserieses, err = db.GetLserieses(bson.M{"bid": lserieses.Lseries[i].BId}, pageSize, pageNo)
 				lserieses.Lseries[i].Children = childLserieses.Lseries
 			}
 		}

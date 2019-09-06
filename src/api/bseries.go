@@ -25,13 +25,6 @@ func initBseries(router *gin.Engine) {
 		context.ShouldBind(&bseries)
 
 		name := bseries.Name
-		//descImg := bseries.DescImg
-		//descImgThumb := bseries.DescImgThumb
-		//gifImg := bseries.GifImg
-		//originFile := bseries.OriginFile
-		//prize := bseries.Prize
-		//pId := bseries.PId
-		//mainImgList := bseries.MainImgList
 
 		fmt.Println("params is: ",name)
 
@@ -51,13 +44,6 @@ func initBseries(router *gin.Engine) {
 
 		startId := bseries.Start
 		endId := bseries.End
-		//descImg := bseries.DescImg
-		//descImgThumb := bseries.DescImgThumb
-		//gifImg := bseries.GifImg
-		//originFile := bseries.OriginFile
-		//prize := bseries.Prize
-		//pId := bseries.PId
-		//mainImgList := bseries.MainImgList
 		var err error
 		start := db.BseriesSingleFindByKV(bson.M{"bid": startId})
 		end := db.BseriesSingleFindByKV(bson.M{"bid": endId})
@@ -105,7 +91,7 @@ func initBseries(router *gin.Engine) {
 		fmt.Println("result: ", result)
 		var childBseries db.LRetData
 		childBseries, err = db.GetLserieses(bson.M{"bid": result.BId}, 1000, 1)
-		//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
+
 		result.Children = childBseries.Lseries
 		if result.BId == id && id != 0{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, result)
@@ -119,20 +105,7 @@ func initBseries(router *gin.Engine) {
 		var bseries = db.BseriesSchema{}
 		context.ShouldBind(&bseries)
 
-		//context.Request.ParseForm()
-		//title := article.Title
-		//content := article.Content
-		//tags := article.Tags
 		name := bseries.Name
-		//seq := bseries.Seq
-		//descImg := product.DescImg
-		//descImgThumb := product.DescImgThumb
-		//gifImg := product.GifImg
-		//originFile := product.OriginFile
-		//prize := product.Prize
-		//pId := product.PId
-		//id := product.Id
-		//mainImgList := product.MainImgList
 
 		idStr := context.Param("id")
 		id, err := strconv.Atoi(idStr)
@@ -189,6 +162,8 @@ func initBseries(router *gin.Engine) {
 				"message": "删除失败"	,
 			})
 		} else {
+			db.RemoveLseries("bid", id)
+			db.RemoveProduct("bid", id)
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, nil)
 		}
 	})
@@ -201,7 +176,7 @@ func initBseries(router *gin.Engine) {
 		pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
 
 		fmt.Println("pageSizeStr", pageNoStr)
-		pId := context.Query("id")
+		bId := context.Query("id")
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
 		if err != nil {
@@ -218,21 +193,21 @@ func initBseries(router *gin.Engine) {
 		var bserieses db.BRetData
 		var childBserieses db.LRetData
 
-		fmt.Println("pId is: ", pId)
-		if pId == "only" {
+		fmt.Println("bId is: ", bId)
+		if bId == "only" {
 			bserieses, err = db.GetBserieses(bson.M{}, pageSize, pageNo)
-		} else if pId != "" {
-			_pId, err := strconv.Atoi(pId)
+		} else if bId != "" {
+			_bId, err := strconv.Atoi(bId)
 			if err != nil {
 				fmt.Println("err: ", err)
 			}
-			bserieses, err = db.GetBserieses(bson.M{"pid": _pId}, pageSize, pageNo)
+			bserieses, err = db.GetBserieses(bson.M{"bid": _bId}, pageSize, pageNo)
 		} else {
 			bserieses, err = db.GetBserieses(bson.M{}, pageSize, pageNo)
 			for i:=0; i < len(bserieses.Bseries);i ++ {
 				fmt.Println("helo: ", )
 				childBserieses, err = db.GetLserieses(bson.M{"bid": bserieses.Bseries[i].BId}, pageSize, pageNo)
-				//, err := db.GetProducts(bson.M{"pid": products.Products[i].Id}, pageSize, pageNo)
+
 				bserieses.Bseries[i].Children = childBserieses.Lseries
 			}
 		}
