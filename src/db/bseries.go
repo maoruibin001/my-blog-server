@@ -74,6 +74,30 @@ func BseriesSingleFindByKV(condition bson.M) BseriesSchema {
 }
 
 
+func GetSomeBserieses(conditions bson.M, pageSize, pageNo int)  (BRetData, error) {
+	c, session := GetCollect("album", "bseries")
+	defer session.Close()
+
+
+	var ret = BRetData{}
+	results := []BseriesSchema{}
+	var err error = nil
+
+	count, err := c.Find(conditions).Count()
+
+	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-modifydate").All(&results)
+
+
+	fmt.Println("results:", results)
+	ret.Bseries = results
+	ret.Count = count
+	if pageNo * pageSize >= count {
+		ret.IsEnd = 1
+	} else {
+		ret.IsEnd = 0
+	}
+	return ret, err
+}
 func GetBserieses(condition bson.M, pageSize, pageNo int) (BRetData, error)  {
 	c, session := GetCollect("album", "bseries")
 	defer session.Close()

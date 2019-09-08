@@ -205,7 +205,6 @@ func initBseries(router *gin.Engine) {
 		} else {
 			bserieses, err = db.GetBserieses(bson.M{}, pageSize, pageNo)
 			for i:=0; i < len(bserieses.Bseries);i ++ {
-				fmt.Println("helo: ", )
 				childBserieses, err = db.GetLserieses(bson.M{"bid": bserieses.Bseries[i].BId}, pageSize, pageNo)
 
 				bserieses.Bseries[i].Children = childBserieses.Lseries
@@ -224,48 +223,59 @@ func initBseries(router *gin.Engine) {
 		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, bserieses)
 	})
 
-	//router.GET("/api/someProducts", func(context *gin.Context) {
-	//	pageSizeStr := context.DefaultQuery("pageSize", config.DEFAULTPAGESIZI)
-	//	pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
-	//
-	//	//pageSizeStr := context.Query("pageSize")
-	//	//pageNoStr := context.Query("pageNo")
-	//	key := context.Query("key")
-	//
-	//	pageSize, err := strconv.Atoi(pageSizeStr)
-	//	if err != nil {
-	//		pageSize = 10
-	//	}
-	//
-	//	pageNo, err := strconv.Atoi(pageNoStr)
-	//	if err != nil {
-	//		pageNo = 1
-	//	}
-	//
-	//	fmt.Println("key: ", key)
-	//	var drafts db.ResData
-	//
-	//	if key == "" {
-	//		drafts, err = db.GetArticles(nil, pageSize, pageNo)
-	//	} else {
-	//		conditions := []bson.M{
-	//			bson.M{"title": bson.M{"$regex": key, "$options": "$i"}},
-	//			bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
-	//			bson.M{"datestr": bson.M{"$regex": key, "$options": "$i"}},
-	//			bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
-	//			bson.M{"ispublish": false},
-	//		}
-	//		drafts, err = db.GetSomeArticles(bson.M{"$or": conditions}, pageSize, pageNo)
-	//	}
-	//
-	//
-	//	if err != nil {
-	//		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR,  gin.H{
-	//			"message": "pageSize: " + pageSizeStr + "pageNo: " + pageNoStr,
-	//		})
-	//		return
-	//	}
-	//	utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, drafts)
-	//})
+	router.GET("/api/someBserieses", func(context *gin.Context) {
+		pageSizeStr := context.DefaultQuery("pageSize", config.DEFAULTPAGESIZI)
+		pageNoStr := context.DefaultQuery("pageNo", config.DEFAULTPAGENO)
+	
+		//pageSizeStr := context.Query("pageSize")
+		//pageNoStr := context.Query("pageNo")
+		key := context.Query("key")
+	
+		pageSize, err := strconv.Atoi(pageSizeStr)
+		if err != nil {
+			pageSize = 10
+		}
+	
+		pageNo, err := strconv.Atoi(pageNoStr)
+		if err != nil {
+			pageNo = 1
+		}
+	
+		fmt.Println("key: ", key)
+		var bserieses db.BRetData
+		var childBserieses db.LRetData
+	
+		if key == "" {
+			bserieses, err = db.GetBserieses(bson.M{}, pageSize, pageNo)
+		} else {
+			conditions := []bson.M{
+				bson.M{"name": bson.M{"$regex": key, "$options": "$i"}},
+				// bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
+				bson.M{"modifydatestr": bson.M{"$regex": key, "$options": "$i"}},
+				// bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
+				// bson.M{"ispublish": false},
+			}
+			bserieses, err = db.GetSomeBserieses(bson.M{"$or": conditions}, pageSize, pageNo)
+			
+		}
+		if err != nil {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR,  gin.H{
+				"message": "pageSize: " + pageSizeStr + "pageNo: " + pageNoStr,
+			})
+			return
+		}
+		for i:=0; i < len(bserieses.Bseries);i ++ {
+			childBserieses, err = db.GetLserieses(bson.M{"bid": bserieses.Bseries[i].BId}, pageSize, pageNo)
+			if err != nil {
+				utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR,  gin.H{
+					"message": "pageSize: " + pageSizeStr + "pageNo: " + pageNoStr,
+				})
+				return
+			}
+			bserieses.Bseries[i].Children = childBserieses.Lseries
+		}
+	
+		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, bserieses)
+	})
 }
 

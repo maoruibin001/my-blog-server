@@ -76,18 +76,21 @@ func ProductSingleFindByKV(condition bson.M) ProductSchema {
 }
 
 
-func GetSomeProducts(conditions bson.M, pageSize, pageNo int)  (RetData, error) {
+func GetSomeProducts(conditions bson.M, pageSize, pageNo int, sortBy string)  (RetData, error) {
 	c, session := GetCollect("album", "product")
 	defer session.Close()
+	_sortBy :=  sortBy
 
-
+	if sortBy == "" {
+		_sortBy = "-seq"
+	} 
 	var ret = RetData{}
 	results := []ProductSchema{}
 	var err error = nil
 
 	count, err := c.Find(conditions).Count()
 
-	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-seq").All(&results)
+	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort(_sortBy).All(&results)
 
 
 	fmt.Println("results:", results)
@@ -105,7 +108,7 @@ func GetSomeProducts(conditions bson.M, pageSize, pageNo int)  (RetData, error) 
 func GetProducts(condition bson.M, pageSize, pageNo int, sortBy string) (RetData, error)  {
 	_sortBy :=  sortBy
 	if sortBy == "" {
-		_sortBy = "seq"
+		_sortBy = "-seq"
 	} 
 	c, session := GetCollect("album", "product")
 	defer session.Close()

@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-//type ImgInfoSchema struct {
-//	ThumbUrl string `json:"thumbUrl"`
-//	Url string `json:"url"`
-//}
 type LseriesMoveSchema struct {
 	Start int `json:"start"`
 	End int `json:"end"`
@@ -90,22 +86,30 @@ func GetLserieses(condition bson.M, pageSize, pageNo int) (LRetData, error)  {
 	return ret, err
 }
 
-//func generationNameId(name string) int {
-//	counter, session := GetCollect("album", name)
-//	defer session.Close()
-//
-//	change := mgo.Change{
-//		Update:    bson.M{"$inc": bson.M{"id": 1}},
-//		Upsert:    true,
-//		ReturnNew: true,
-//	}
-//	doc := struct{ Id int }{}
-//	if _, err := counter.Find(bson.M{}).Apply(change, &doc); err != nil {
-//		utils.HandleError("查找出错", err)
-//	}
-//	log.Println("doc:", doc)
-//	return doc.Id
-//}
+func GetSomeLserieses(conditions bson.M, pageSize, pageNo int)  (LRetData, error) {
+	c, session := GetCollect("album", "lseries")
+	defer session.Close()
+
+
+	var ret = LRetData{}
+	results := []LseriesSchema{}
+	var err error = nil
+
+	count, err := c.Find(conditions).Count()
+
+	err = c.Find(conditions).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("-modifydate").All(&results)
+
+
+	fmt.Println("results:", results)
+	ret.Lseries = results
+	ret.Count = count
+	if pageNo * pageSize >= count {
+		ret.IsEnd = 1
+	} else {
+		ret.IsEnd = 0
+	}
+	return ret, err
+}
 func CreateLseries(bId int,name, mainImg, mainImgThumb string) LseriesSchema {
 	m := LseriesSchema{}
 	m.BId = bId

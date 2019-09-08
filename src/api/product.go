@@ -269,19 +269,19 @@ func initProduct(router *gin.Engine) {
 		}
 
 		fmt.Println("key: ", key)
-		var drafts db.ResData
+		var products db.RetData
 
 		if key == "" {
-			drafts, err = db.GetArticles(nil, pageSize, pageNo)
+			products, err = db.GetProducts(bson.M{}, pageSize, pageNo, "")
 		} else {
 			conditions := []bson.M{
-				bson.M{"title": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"datestr": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
-				bson.M{"ispublish": false},
+				bson.M{"name": bson.M{"$regex": key, "$options": "$i"}},
+				// bson.M{"content": bson.M{"$regex": key, "$options": "$i"}},
+				bson.M{"modifydatestr": bson.M{"$regex": key, "$options": "$i"}},
+				// bson.M{"tags": bson.M{"$regex": key, "$options": "$i"}},
+				// bson.M{"ispublish": false},
 			}
-			drafts, err = db.GetSomeArticles(bson.M{"$or": conditions}, pageSize, pageNo)
+			products, err = db.GetSomeProducts(bson.M{"$or": conditions}, pageSize, pageNo, "")
 		}
 
 
@@ -291,7 +291,7 @@ func initProduct(router *gin.Engine) {
 			})
 			return
 		}
-		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, drafts)
+		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, products)
 	})
 }
 
