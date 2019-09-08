@@ -150,16 +150,6 @@ func initProduct(router *gin.Engine) {
 			return
 		}
 
-		//if title == "" {
-		//	title = draft.Title
-		//}
-		//if content == "" {
-		//	content = draft.Content
-		//}
-		//if len(tags) == 0 {
-		//	tags = draft.Tags
-		//}
-
 		err = db.ChangeProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId,id, mainImgList, oldProduct.Seq)
 
 		if err != nil {
@@ -211,16 +201,19 @@ func initProduct(router *gin.Engine) {
 
 		fmt.Println("pageSizeStr", pageNoStr)
 		lId := context.Query("lId")
+		bId := context.Query("bId")
+
+		fmt.Println("bid is22: ", bId)
 
 		pageSize, err := strconv.Atoi(pageSizeStr)
 		if err != nil {
-			//pageSize = 10
+			pageSize = 10
 			fmt.Println("err: ", err)
 		}
 
 		pageNo, err := strconv.Atoi(pageNoStr)
 		if err != nil {
-			//pageNo = 1
+			pageNo = 1
 		}
 
 		fmt.Println("pagesize: ", pageSize, pageNo)
@@ -228,18 +221,22 @@ func initProduct(router *gin.Engine) {
 		//var childProducts db.RetData
 
 		fmt.Println("lId is: ", lId)
-		if lId != "" && lId != "-100" && lId != "0" {
+		if lId != "" {
 			_lId, err := strconv.Atoi(lId)
 			if err != nil {
 				fmt.Println("err: ", err)
 			}
-			products, err = db.GetProducts(bson.M{"lid": _lId}, pageSize, pageNo)
-			fmt.Println("products22:", products)
-		} else if lId == ""{
-			products, err = db.GetProducts(bson.M{}, pageSize, pageNo)
+			products, err = db.GetProducts(bson.M{"lid": _lId}, pageSize, pageNo, "")
+		} else if bId != ""{
+			_bId, err := strconv.Atoi(bId)
+			if err != nil {
+				fmt.Println("err: ", err)
+			}
+		
+			products, err = db.GetProducts(bson.M{"bid": _bId}, pageSize, pageNo, "")
 
 		} else  {
-			products, err = db.GetProducts(bson.M{}, pageSize, pageNo)
+			products, err = db.GetProducts(bson.M{}, pageSize, pageNo, "modifydate")
 		}
 
 		fmt.Println("products:", products)

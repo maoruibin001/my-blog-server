@@ -46,23 +46,6 @@ type RetData struct {
 func InsertProduct(data ProductSchema) ProductSchema {
 	c, session := GetCollect("album", "product")
 	defer session.Close()
-	// m := ProductSchema{}
-	// m.Id = data.Id
-	// m.Seq = data.Seq
-	// m.LId = data.LId
-	// m.Name = data.Name
-	// m.DescImg = data.DescImg
-	// m.DescImgThumb = data.DescImgThumb
-	// m.GifImg = data.GifImg
-	// m.OriginFile = data.OriginFile
-	// m.Prize = data.Prize
-	// m.MainImgList = data.MainImgList
-	// m.CreateDate = data.CreateDate
-	// m.CreateDateStr = data.CreateDateStr
-	// m.ModifyDate = data.ModifyDate
-	// m.ModifyDateStr = data.ModifyDateStr
-
-
 	utils.HandleError("insert error: ", c.Insert(&data))
 	fmt.Println("插入一条数据", data)
 
@@ -119,7 +102,11 @@ func GetSomeProducts(conditions bson.M, pageSize, pageNo int)  (RetData, error) 
 }
 
 
-func GetProducts(condition bson.M, pageSize, pageNo int) (RetData, error)  {
+func GetProducts(condition bson.M, pageSize, pageNo int, sortBy string) (RetData, error)  {
+	_sortBy :=  sortBy
+	if sortBy == "" {
+		_sortBy = "seq"
+	} 
 	c, session := GetCollect("album", "product")
 	defer session.Close()
 
@@ -129,7 +116,7 @@ func GetProducts(condition bson.M, pageSize, pageNo int) (RetData, error)  {
 	var ret = RetData{}
 
 	fmt.Println("condition:", condition)
-	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort("seq").All(&results)
+	err = c.Find(condition).Limit(pageSize).Skip((pageNo - 1) * pageSize).Sort(_sortBy).All(&results)
 	count, err = c.Find(condition).Count()
 	fmt.Println("results:", results)
 
