@@ -18,7 +18,7 @@ type JSONFormat struct {
 }
 
 func initLogin(router *gin.Engine) {
-	router.POST("/api/login", func(context *gin.Context) {
+	router.POST("/api/login",func(context *gin.Context) {
 		user := db.UserSchema{}
 		context.ShouldBind(&user)
 		phone := user.Phone

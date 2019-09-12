@@ -88,7 +88,7 @@ func initUser(router *gin.Engine) {
 		}
 	})
 	//修改用户
-	router.PUT("/api/user", func(context *gin.Context) {
+	router.PUT("/api/user",  middleware.JWTAuth(),func(context *gin.Context) {
 		context.Request.ParseForm()
 
 		user := db.UserSchema{}
@@ -132,7 +132,7 @@ func initUser(router *gin.Engine) {
 		}
 	})
 	//删除用户
-	router.DELETE("/api/user/:phone", func(context *gin.Context) {
+	router.DELETE("/api/user/:phone",  middleware.JWTAuth(),func(context *gin.Context) {
 
 		phone := context.Param("phone")
 

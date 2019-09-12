@@ -54,7 +54,7 @@ func initProduct(router *gin.Engine) {
 
 
 	//创建大系列
-	router.POST("/api/product/move", func(context *gin.Context) {
+	router.POST("/api/product/move",  middleware.JWTAuth(),func(context *gin.Context) {
 		fmt.Println("move product ....")
 
 		var lseries = db.ProductMoveSchema{}
@@ -114,7 +114,7 @@ func initProduct(router *gin.Engine) {
 		}
 	})
 	//修改产品
-	router.PUT("/api/product/:id", func(context *gin.Context) {
+	router.PUT("/api/product/:id", middleware.JWTAuth(), func(context *gin.Context) {
 
 		var product = db.ProductSchema{}
 		context.ShouldBind(&product)
@@ -160,7 +160,7 @@ func initProduct(router *gin.Engine) {
 		}
 	})
 	//删除产品
-	router.DELETE("/api/product/:id", func(context *gin.Context) {
+	router.DELETE("/api/product/:id",  middleware.JWTAuth(),func(context *gin.Context) {
 
 		idStr := context.Param("id")
 
