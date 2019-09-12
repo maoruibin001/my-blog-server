@@ -36,7 +36,7 @@ type BRetData struct {
 	IsEnd int `json:"isEnd"`
 }
 func InsertBseries(data BseriesSchema) BseriesSchema {
-	c, session := GetCollect("album", "bseries")
+	c, session := GetCollect(utils.GetDbName(), "bseries")
 	defer session.Close()
 	m := BseriesSchema{}
 	m.BId = data.BId
@@ -57,7 +57,7 @@ func InsertBseries(data BseriesSchema) BseriesSchema {
 
 func BseriesSingleFindByKV(condition bson.M) BseriesSchema {
 
-	c, session := GetCollect("album", "bseries")
+	c, session := GetCollect(utils.GetDbName(), "bseries")
 	defer session.Close()
 
 	results := []BseriesSchema{}
@@ -75,7 +75,7 @@ func BseriesSingleFindByKV(condition bson.M) BseriesSchema {
 
 
 func GetSomeBserieses(conditions bson.M, pageSize, pageNo int)  (BRetData, error) {
-	c, session := GetCollect("album", "bseries")
+	c, session := GetCollect(utils.GetDbName(), "bseries")
 	defer session.Close()
 
 
@@ -99,7 +99,7 @@ func GetSomeBserieses(conditions bson.M, pageSize, pageNo int)  (BRetData, error
 	return ret, err
 }
 func GetBserieses(condition bson.M, pageSize, pageNo int) (BRetData, error)  {
-	c, session := GetCollect("album", "bseries")
+	c, session := GetCollect(utils.GetDbName(), "bseries")
 	defer session.Close()
 
 	results := []BseriesSchema{}
@@ -123,7 +123,7 @@ func GetBserieses(condition bson.M, pageSize, pageNo int) (BRetData, error)  {
 }
 
 func generationNameId(name string) int {
-	counter, session := GetCollect("album", name)
+	counter, session := GetCollect(utils.GetDbName(), name)
 	defer session.Close()
 
 	change := mgo.Change{
@@ -151,7 +151,7 @@ func CreateBseries(name string) BseriesSchema {
 }
 
 func ChangeBseries(id int, name string, seq int) error {
-	c, session := GetCollect("album", "bseries")
+	c, session := GetCollect(utils.GetDbName(), "bseries")
 	defer session.Close()
 
 	selector := bson.M{"bid": id}
@@ -166,7 +166,7 @@ func ChangeBseries(id int, name string, seq int) error {
 }
 
 func RemoveBseries(k string, v interface{}) error {
-	c, session := GetCollect("album", "bseries")
+	c, session := GetCollect(utils.GetDbName(), "bseries")
 	defer session.Close()
 
 	_, err := c.RemoveAll(bson.M{k: v})
@@ -174,7 +174,7 @@ func RemoveBseries(k string, v interface{}) error {
 	return err
 }
 //func IniProductData()  {
-//	c, session := GetCollect("album", "product")
+//	c, session := GetCollect(utils.GetDbName(), "product")
 //	defer session.Close()
 //	count, err := c.Count()
 //	utils.HandleError("查找错误：", err)

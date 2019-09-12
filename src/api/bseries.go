@@ -6,7 +6,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"album-server/src/config"
 	"album-server/src/db"
-	"album-server/src/middleware"
+	// "album-server/src/middleware"
 	"album-server/src/utils"
 	"net/http"
 	"strconv"
@@ -18,7 +18,7 @@ func createBseries(name string) interface{} {
 }
 func initBseries(router *gin.Engine) {
 	//创建大系列
-	router.POST("/api/bseries",middleware.JWTAuth(), func(context *gin.Context) {
+	router.POST("/api/bseries", func(context *gin.Context) {
 		fmt.Println("create bseries ....")
 
 		var bseries = db.BseriesSchema{}
@@ -134,7 +134,7 @@ func initBseries(router *gin.Engine) {
 		}
 	})
 	//删除产品
-	router.DELETE("/api/bseries/:id",middleware.JWTAuth(), func(context *gin.Context) {
+	router.DELETE("/api/bseries/:id", func(context *gin.Context) {
 
 		idStr := context.Param("id")
 

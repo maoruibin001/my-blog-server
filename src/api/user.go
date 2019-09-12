@@ -1,45 +1,60 @@
 package api
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"album-server/src/config"
 	"album-server/src/db"
+	"album-server/src/middleware"
 	"album-server/src/utils"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 )
 //TODO: 需要一个用户信息返回过滤函数。
 //TODO: 缺少一个修改密码的函数。
 
-func createUser(name, age, phone, password string) interface{} {
+func createUser(name, phone, password string, isKeeper int) interface{} {
 	salt := utils.MD5(utils.GetRandomString(8) + config.Salt)
 	pw := utils.MD5(password)
-	userInfo := db.CreateUser(name, age, phone, pw, salt)
+	userInfo := db.CreateUser(name, phone, pw, salt, isKeeper)
 	return userInfo
 }
-
 func init() {
-	c, session := db.GetCollect("my-blog-2", "user")
+	fmt.Println("hello world")
+	c, session := db.GetCollect(utils.GetDbName(), "user")
 	defer session.Close()
 	count, err := c.Count()
 	utils.HandleError("查找错误：", err)
 	if count == 0 {
 		fmt.Println("用户数据库为空，初始化数据...")
-		createUser("mao", "20", "123", "123")
+		createUser("admin", "123", "123", 1)
 	}
 }
 func initUser(router *gin.Engine) {
 	//创建新用户
-	router.POST("/api/user", func(context *gin.Context) {
-		fmt.Println("create user ....")
+	router.POST("/api/user", middleware.JWTAuth(), func(context *gin.Context) {
+		fmt.Println("add user ....")
 
 		user := db.UserSchema{}
-		context.BindJSON(&user)
+		context.ShouldBind(&user)
 		fmt.Println("param: ", user)
 		name := user.Name
 		phone := user.Phone
 		password := user.Password
-		age := user.Age
+		isKeeper := user.IsKeeper
+
+		keeperPhone := context.GetString("phone")
+		fmt.Println(keeperPhone)
+
+		if keeperPhone == "" {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+			return
+		}
+		keeperUser := db.FindByPhone(keeperPhone)
+
+		if keeperUser.IsKeeper == 0 {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+			return
+		}
 
 		checkUser := db.FindByPhone(phone)
 
@@ -48,7 +63,9 @@ func initUser(router *gin.Engine) {
 			return
 		}
 
-		userInfo := createUser(name, age, phone, password)
+
+
+		userInfo := createUser(name, phone, password, isKeeper)
 
 		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, userInfo)
 	})
@@ -61,13 +78,11 @@ func initUser(router *gin.Engine) {
 		user := db.FindByPhone(phone)
 		fmt.Println("userinfo: ", user)
 		if user.Phone == phone && phone != ""{
-			var result = map[string]string{
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, gin.H{
 				"name": user.Name,
-				"age": user.Age,
 				"phone": user.Phone,
 				"id": user.Id,
-			}
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, result)
+			})
 		} else {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOUSER, nil)
 		}
@@ -80,13 +95,12 @@ func initUser(router *gin.Engine) {
 		context.BindJSON(&user)
 		phone := user.Phone
 		name := user.Name
-		age := user.Age
 		//password := context.Request.FormValue("password")
 		id := user.Id
-
+		isKeeper := user.IsKeeper
 		checkUser := db.FindById(id)
 
-		if checkUser.Id != id || id == "" {
+		if checkUser.Id != id || id == 0{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOUSER, nil)
 			return
 		}
@@ -97,16 +111,13 @@ func initUser(router *gin.Engine) {
 		if name == "" {
 			name = user.Name
 		}
-		if age == "" {
-			age = user.Age
-		}
 		//if password == "" {
 		//	password = user.Password
 		//}
 		salt := checkUser.Salt
 
 
-		err := db.ChangeUser(id, name, age, phone, salt)
+		err := db.ChangeUser(id, name, phone, salt, isKeeper)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEUPDATEERROR, nil)
@@ -116,7 +127,7 @@ func initUser(router *gin.Engine) {
 				"id": user.Id,
 				"name": user.Name,
 				"phone": user.Phone,
-				"age": user.Age,
+				"isKeeper": user.IsKeeper,
 			})
 		}
 	})

@@ -18,7 +18,7 @@ func createProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lI
 }
 func initProduct(router *gin.Engine) {
 	//创建产品
-	router.POST("/api/product",middleware.JWTAuth(), func(context *gin.Context) {
+	router.POST("/api/product", middleware.JWTAuth(), func(context *gin.Context) {
 		fmt.Println("create product ....")
 
 		var product = db.ProductSchema{}
@@ -160,7 +160,7 @@ func initProduct(router *gin.Engine) {
 		}
 	})
 	//删除产品
-	router.DELETE("/api/product/:id",middleware.JWTAuth(), func(context *gin.Context) {
+	router.DELETE("/api/product/:id", func(context *gin.Context) {
 
 		idStr := context.Param("id")
 
@@ -221,7 +221,7 @@ func initProduct(router *gin.Engine) {
 		//var childProducts db.RetData
 
 		fmt.Println("lId is: ", lId)
-		if lId != "" {
+		if lId != "" && lId != "0" {
 			_lId, err := strconv.Atoi(lId)
 			if err != nil {
 				fmt.Println("err: ", err)

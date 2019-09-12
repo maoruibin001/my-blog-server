@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"album-server/src/config"
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"album-server/src/config"
 	"net/http"
 	"strings"
 	"time"
@@ -35,6 +35,7 @@ func JWTAuth() gin.HandlerFunc {
 			return
 		}
 		c.Set("claims", claims)
+		c.Set("phone", claims.Phone)
 	}
 }
 type JWT struct {
@@ -49,11 +50,13 @@ var (
 	SignKey string = config.Salt
 )
 type CustomClaims struct {
-	ID string `json:"id"`
+	ID int `json:"id"`
 	Name string `json:"name"`
 	Phone string `json:"phone"`
 	jwt.StandardClaims
 }
+
+
 func NewJWT() *JWT {
 	return &JWT{
 		[]byte(GetSignKey()),

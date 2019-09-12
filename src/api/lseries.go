@@ -7,7 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"album-server/src/config"
 	"album-server/src/db"
-	"album-server/src/middleware"
+	// "album-server/src/middleware"
 	"album-server/src/utils"
 	"net/http"
 	"strconv"
@@ -19,7 +19,7 @@ func createLseries(bId int, name, mainImg, mainImgThumb string) interface{} {
 }
 func initLseries(router *gin.Engine) {
 	//创建大系列
-	router.POST("/api/lseries",middleware.JWTAuth(), func(context *gin.Context) {
+	router.POST("/api/lseries", func(context *gin.Context) {
 		fmt.Println("create lseries ....")
 
 		var lseries = db.LseriesSchema{}
@@ -138,7 +138,7 @@ func initLseries(router *gin.Engine) {
 		}
 	})
 	//删除产品
-	router.DELETE("/api/lseries/:id",middleware.JWTAuth(), func(context *gin.Context) {
+	router.DELETE("/api/lseries/:id", func(context *gin.Context) {
 
 		idStr := context.Param("id")
 

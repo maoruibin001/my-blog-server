@@ -44,7 +44,7 @@ type RetData struct {
 	IsEnd int `json:"isEnd"`
 }
 func InsertProduct(data ProductSchema) ProductSchema {
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 	utils.HandleError("insert error: ", c.Insert(&data))
 	fmt.Println("插入一条数据", data)
@@ -59,7 +59,7 @@ func InsertProduct(data ProductSchema) ProductSchema {
 
 func ProductSingleFindByKV(condition bson.M) ProductSchema {
 
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 
 	results := []ProductSchema{}
@@ -77,7 +77,7 @@ func ProductSingleFindByKV(condition bson.M) ProductSchema {
 
 
 func GetSomeProducts(conditions bson.M, pageSize, pageNo int, sortBy string)  (RetData, error) {
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 	_sortBy :=  sortBy
 
@@ -110,7 +110,7 @@ func GetProducts(condition bson.M, pageSize, pageNo int, sortBy string) (RetData
 	if sortBy == "" {
 		_sortBy = "-seq"
 	} 
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 
 	results := []ProductSchema{}
@@ -135,7 +135,7 @@ func GetProducts(condition bson.M, pageSize, pageNo int, sortBy string) (RetData
 
 func ProductMultiFindByKV(condition bson.M) []ProductSchema {
 
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 
 	results := []ProductSchema{}
@@ -147,7 +147,7 @@ func ProductMultiFindByKV(condition bson.M) []ProductSchema {
 }
 
 func generationId() int {
-	counter, session := GetCollect("album", "acounter")
+	counter, session := GetCollect(utils.GetDbName(), "acounter")
 	defer session.Close()
 
 	change := mgo.Change{
@@ -183,7 +183,7 @@ func CreateProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lI
 }
 
 func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId,id int, mainImgList []ImgInfoSchema, seq int) error {
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 
 	selector := bson.M{"id": id}
@@ -199,7 +199,7 @@ func ChangeProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lI
 }
 
 func RemoveProduct(k string, v interface{}) error {
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 
 	_, err := c.RemoveAll(bson.M{k: v})
@@ -210,7 +210,7 @@ func RemoveProduct(k string, v interface{}) error {
 	return err
 }
 func IniProductData()  {
-	c, session := GetCollect("album", "product")
+	c, session := GetCollect(utils.GetDbName(), "product")
 	defer session.Close()
 	count, err := c.Count()
 	utils.HandleError("查找错误：", err)

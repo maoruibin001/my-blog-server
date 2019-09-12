@@ -7,6 +7,7 @@ const RESPONSEUNLOGIN = 10000 //用户未登陆
 //**********不存在开始***************//
 
 const RESPONSENOUSER = 11000 //没有这个用户
+const RESPONSEPASSWORDERROR = 11000 //密码错误
 
 const RESPONSENOARTICLE = 11100 //文章不存在
 
@@ -24,5 +25,7 @@ const RESPONSEUPDATEERROR = 14000 // 数据更新失败
 const RESPONSETOKENINVALID = 15000 // token失效
 
 const RESPONSENOTOKEN = 15001 // 没有token
+
+const RESPONSENOAUTH = 16001 // 没有token
 
 

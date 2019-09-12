@@ -13,11 +13,13 @@ import (
 )
 
 var ResArr = [1000000]string{}
+var DBNAME = "album"
 
 func initResCode() {
 	ResArr[RESPONSEOK] = "ok"
 	ResArr[RESPONSEUNLOGIN] = "用户未登陆"
 	ResArr[RESPONSENOUSER] = "用户不存在"
+	ResArr[RESPONSEPASSWORDERROR] = "密码错误"
 	ResArr[RESPONSEUSEREXSIST] = "此用户已存在"
 	ResArr[RESPONSENOARTICLE] = "内容不存在"
 	ResArr[RESPONSEPARAMERROR] = "请求参数错误"
@@ -25,6 +27,7 @@ func initResCode() {
 	ResArr[RESPONSEUPDATEERROR] = "数据更新失败"
 	ResArr[RESPONSETOKENINVALID] = "token失效"
 	ResArr[RESPONSENOTOKEN] = "没有token"
+	ResArr[RESPONSENOAUTH] = "没有权限"
 
 }
 
@@ -107,4 +110,15 @@ func ResponseJson(context *gin.Context, code, retCode int, data interface{})  {
 
 func GetType(param interface{}) string {
 	return fmt.Sprint(reflect.TypeOf(param))
+}
+
+func GetDbName() string {
+	return  DBNAME
+}
+
+func SetDbName(flag string) {
+	// if flag == "" {
+	// 	return nil
+	// }
+	DBNAME = "album" + flag
 }

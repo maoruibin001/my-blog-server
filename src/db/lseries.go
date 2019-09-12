@@ -15,6 +15,7 @@ type LseriesMoveSchema struct {
 	Type string `json:"type"`
 }
 type LseriesSchema struct {
+
 	BId int `json:"bId"`
 	LId int`json:"lId"`
 	Name  string    `json:"name"`
@@ -33,7 +34,7 @@ type LRetData struct {
 	IsEnd int `json:"isEnd"`
 }
 func InsertLseries(data LseriesSchema) LseriesSchema {
-	c, session := GetCollect("album", "lseries")
+	c, session := GetCollect(utils.GetDbName(), "lseries")
 	defer session.Close()
 
 	utils.HandleError("insert error: ", c.Insert(&data))
@@ -45,7 +46,7 @@ func InsertLseries(data LseriesSchema) LseriesSchema {
 
 func LseriesSingleFindByKV(condition bson.M) LseriesSchema {
 
-	c, session := GetCollect("album", "lseries")
+	c, session := GetCollect(utils.GetDbName(), "lseries")
 	defer session.Close()
 
 	results := []LseriesSchema{}
@@ -63,7 +64,7 @@ func LseriesSingleFindByKV(condition bson.M) LseriesSchema {
 
 
 func GetLserieses(condition bson.M, pageSize, pageNo int) (LRetData, error)  {
-	c, session := GetCollect("album", "lseries")
+	c, session := GetCollect(utils.GetDbName(), "lseries")
 	defer session.Close()
 
 	results := []LseriesSchema{}
@@ -87,7 +88,7 @@ func GetLserieses(condition bson.M, pageSize, pageNo int) (LRetData, error)  {
 }
 
 func GetSomeLserieses(conditions bson.M, pageSize, pageNo int)  (LRetData, error) {
-	c, session := GetCollect("album", "lseries")
+	c, session := GetCollect(utils.GetDbName(), "lseries")
 	defer session.Close()
 
 
@@ -126,7 +127,7 @@ func CreateLseries(bId int,name, mainImg, mainImgThumb string) LseriesSchema {
 }
 
 func ChangeLseries(id int, name, mainImg, mainImgThumb string, seq int) error {
-	c, session := GetCollect("album", "lseries")
+	c, session := GetCollect(utils.GetDbName(), "lseries")
 	defer session.Close()
 
 	selector := bson.M{"lid": id}
@@ -142,7 +143,7 @@ func ChangeLseries(id int, name, mainImg, mainImgThumb string, seq int) error {
 }
 
 func RemoveLseries(k string, v interface{}) error {
-	c, session := GetCollect("album", "lseries")
+	c, session := GetCollect(utils.GetDbName(), "lseries")
 	defer session.Close()
 
 	_, err := c.RemoveAll(bson.M{k: v})
@@ -150,7 +151,7 @@ func RemoveLseries(k string, v interface{}) error {
 	return err
 }
 //func IniProductData()  {
-//	c, session := GetCollect("album", "product")
+//	c, session := GetCollect(utils.GetDbName(), "product")
 //	defer session.Close()
 //	count, err := c.Count()
 //	utils.HandleError("查找错误：", err)

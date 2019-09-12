@@ -17,8 +17,8 @@ func InitRouter(router *gin.Engine) {
 	//initComment(router)
 	//initDraft(router)
 	//initTag(router)
-	//initUser(router)
-	//initLogin(router)
+	initUser(router)
+	initLogin(router)
 	//initArticle(router)
 
 
