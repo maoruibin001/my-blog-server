@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 //TODO: 需要一个用户信息返回过滤函数。
 //TODO: 缺少一个修改密码的函数。
@@ -19,14 +20,13 @@ func createUser(name, phone, password string, isKeeper int) interface{} {
 	return userInfo
 }
 func init() {
-	fmt.Println("hello world")
 	c, session := db.GetCollect(utils.GetDbName(), "user")
 	defer session.Close()
 	count, err := c.Count()
 	utils.HandleError("查找错误：", err)
 	if count == 0 {
 		fmt.Println("用户数据库为空，初始化数据...")
-		createUser("admin", "123", "123", 1)
+		createUser("admin", "13726648009", "123", 1)
 	}
 }
 func initUser(router *gin.Engine) {
@@ -36,7 +36,6 @@ func initUser(router *gin.Engine) {
 
 		user := db.UserSchema{}
 		context.ShouldBind(&user)
-		fmt.Println("param: ", user)
 		name := user.Name
 		phone := user.Phone
 		password := user.Password
@@ -74,10 +73,25 @@ func initUser(router *gin.Engine) {
 
 	router.GET("/api/user", func(context *gin.Context) {
 		phone := context.Query("phone")
+		idStr := context.Query("id")
 		fmt.Println("phone is: ", phone)
-		user := db.FindByPhone(phone)
+		var user db.UserSchema
+		if phone != "" {
+			user = db.FindByPhone(phone)
+		} else if idStr != "" {
+			id, err := strconv.Atoi(idStr)
+			if err != nil {
+				utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, gin.H{
+					"errorMsg": "id错误，请输入正确的id: " + idStr,
+				})
+				return
+
+			}
+			user = db.FindById(id)
+		}
+
 		fmt.Println("userinfo: ", user)
-		if user.Phone == phone && phone != ""{
+		if user.Phone != ""{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, gin.H{
 				"name": user.Name,
 				"phone": user.Phone,
@@ -92,12 +106,27 @@ func initUser(router *gin.Engine) {
 		context.Request.ParseForm()
 
 		user := db.UserSchema{}
-		context.BindJSON(&user)
+		context.ShouldBind(&user)
+
 		phone := user.Phone
 		name := user.Name
-		//password := context.Request.FormValue("password")
+		password := user.Password
 		id := user.Id
 		isKeeper := user.IsKeeper
+
+		keeperPhone := context.GetString("phone")
+		fmt.Println(keeperPhone)
+		if keeperPhone == "" {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+			return
+		}
+		keeperUser := db.FindByPhone(keeperPhone)
+
+		if keeperUser.IsKeeper == 0 {
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+			return
+		}
+
 		checkUser := db.FindById(id)
 
 		if checkUser.Id != id || id == 0{
@@ -111,13 +140,13 @@ func initUser(router *gin.Engine) {
 		if name == "" {
 			name = user.Name
 		}
-		//if password == "" {
-		//	password = user.Password
-		//}
+		if password == "" {
+			password = user.Password
+		}
 		salt := checkUser.Salt
 
 
-		err := db.ChangeUser(id, name, phone, salt, isKeeper)
+		err := db.ChangeUser(id, name, phone, salt, password, isKeeper)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEUPDATEERROR, nil)
@@ -132,20 +161,29 @@ func initUser(router *gin.Engine) {
 		}
 	})
 	//删除用户
-	router.DELETE("/api/user/:phone",  middleware.JWTAuth(),func(context *gin.Context) {
+	router.DELETE("/api/user",  middleware.JWTAuth(),func(context *gin.Context) {
 
-		phone := context.Param("phone")
+		user := db.UserSchema{}
+		context.ShouldBind(&user)
+		phone := user.Phone
+		id := user.Id
 
 		//查询用户
-		fmt.Println("phone2 is: ", phone)
-		user := db.FindByPhone(phone)
 
-		if user.Phone != phone || phone == "" {
+		var _user db.UserSchema
+
+		if user.Phone != "" {
+			_user = db.FindByPhone(phone)
+		} else if user.Id != 0 {
+			_user = db.FindById(id)
+		}
+
+		if _user.Phone == "" {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOUSER, nil)
 			return
 		}
 
-		err := db.RemoveUser("phone", phone)
+		err := db.RemoveUser("phone", _user.Phone)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSESERVERERROR, gin.H{

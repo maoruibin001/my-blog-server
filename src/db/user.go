@@ -97,12 +97,12 @@ func CreateUser(name, phone, password, salt string, isKeeper int) UserSchema {
 	return InsertUser(userInfo)
 }
 
-func ChangeUser(id int, name, phone, salt string, isKeeper int) error {
+func ChangeUser(id int, name, phone, salt, password string, isKeeper int) error {
 	c, session := GetCollect(utils.GetDbName(), "user")
 	defer session.Close()
 
 	selector := bson.M{"id": id}
-	data := bson.M{"name": name,"phone": phone, "salt": salt, "iskeeper": isKeeper}
+	data := bson.M{"name": name,"phone": phone, "salt": salt, "password": password, "iskeeper": isKeeper}
 
 	err := c.Update(selector, bson.M{"$set": data})
 
