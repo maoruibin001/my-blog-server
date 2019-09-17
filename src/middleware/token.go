@@ -15,7 +15,7 @@ func JWTAuth() gin.HandlerFunc {
 		token := c.DefaultQuery("token", "")
 		if token == "" {
 			token = c.Request.Header.Get("Authorization")
-			if s := strings.Split(token, " "); len(s) == 2 {
+			if s := strings.Split(token, " "); len(s) == 3 {
 				token = s[1]
 			}
 		}

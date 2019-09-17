@@ -41,13 +41,19 @@ func initLogin(router *gin.Engine) {
 		claims := middleware.CustomClaims{result.Id, result.Name, result.Phone, jwt.StandardClaims{}}
 		token, err := j.CreateToken(claims)
 
-		fmt.Println("token is: ", token)
+		fmt.Println("token is: ", result.IsKeeper)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, nil)
 		} else {
 			result.Token = token
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, result)
+			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK,  gin.H{
+				"id": result.Id,
+				"name": result.Name,
+				"phone": result.Phone,
+				"isKeeper": result.IsKeeper,
+				"token": result.Token,
+			})
 		}
 	})
 }

@@ -6,6 +6,7 @@ import (
 	"album-server/src/middleware"
 	"album-server/src/utils"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -13,14 +14,14 @@ import (
 //TODO: 需要一个用户信息返回过滤函数。
 //TODO: 缺少一个修改密码的函数。
 
-func createUser(name, phone, password string, isKeeper int) interface{} {
+func createUser(name, phone, password string, isKeeper int) db.UserSchema {
 	salt := utils.MD5(utils.GetRandomString(8) + config.Salt)
 	pw := utils.MD5(password)
 	userInfo := db.CreateUser(name, phone, pw, salt, isKeeper)
 	return userInfo
 }
 func init() {
-	c, session := db.GetCollect(utils.GetDbName(), "user")
+	c, session := db.GetCollect("userdb", "user")
 	defer session.Close()
 	count, err := c.Count()
 	utils.HandleError("查找错误：", err)
@@ -66,7 +67,13 @@ func initUser(router *gin.Engine) {
 
 		userInfo := createUser(name, phone, password, isKeeper)
 
-		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, userInfo)
+		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, gin.H{
+			"id": userInfo.Id,
+			"name": userInfo.Name,
+			"phone": userInfo.Phone,
+			"isKeeper": userInfo.IsKeeper,
+			"token": userInfo.Token,
+		})
 	})
 
 	//查询用户信息
@@ -115,24 +122,36 @@ func initUser(router *gin.Engine) {
 		isKeeper := user.IsKeeper
 
 		keeperPhone := context.GetString("phone")
-		fmt.Println(keeperPhone)
-		if keeperPhone == "" {
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
-			return
-		}
-		keeperUser := db.FindByPhone(keeperPhone)
+		fmt.Println("keeperPhone is: ", keeperPhone)
+		//if keeperPhone == "" {
+		//	utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+		//	return
+		//}
+		//keeperUser := db.FindByPhone(keeperPhone)
 
-		if keeperUser.IsKeeper == 0 {
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
-			return
+		//fmt.Println("keeperUser: ", keeperUser.IsKeeper)
+		//if keeperUser.IsKeeper == 0 {
+		//	utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+		//	return
+		//}
+		if isKeeper == 1 {
+			fmt.Println("id: ", id)
+			keeperUser := db.FindById(id)
+
+			fmt.Println(keeperUser.Id)
+			if keeperUser.Id != id || id == 0{
+				utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOUSER, nil)
+				return
+			}
+
+			if (keeperUser.IsKeeper != 1) {
+				utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOAUTH, nil)
+				return
+			}
 		}
 
-		checkUser := db.FindById(id)
 
-		if checkUser.Id != id || id == 0{
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSENOUSER, nil)
-			return
-		}
+
 
 		if phone == "" {
 			phone = user.Phone
@@ -143,21 +162,35 @@ func initUser(router *gin.Engine) {
 		if password == "" {
 			password = user.Password
 		}
-		salt := checkUser.Salt
+		pw := utils.MD5(password)
+		salt := utils.MD5(utils.GetRandomString(8) + config.Salt)
 
+		fmt.Println("hello world")
 
-		err := db.ChangeUser(id, name, phone, salt, password, isKeeper)
+		err := db.ChangeUser(id, name, phone, salt, pw, isKeeper)
 
 		if err != nil {
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEUPDATEERROR, nil)
 		} else {
-			user = db.FindById(id)
-			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, gin.H{
-				"id": user.Id,
-				"name": user.Name,
-				"phone": user.Phone,
-				"isKeeper": user.IsKeeper,
-			})
+			result := db.FindById(id)
+			j := middleware.NewJWT()
+			claims := middleware.CustomClaims{result.Id, result.Name, result.Phone, jwt.StandardClaims{}}
+			token, err := j.CreateToken(claims)
+
+			fmt.Println("token is: ", result.IsKeeper)
+
+			if err != nil {
+				utils.ResponseJson(context, http.StatusOK, utils.RESPONSEPARAMERROR, nil)
+			} else {
+				result.Token = token
+				utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, gin.H{
+					"id":       result.Id,
+					"name":     result.Name,
+					"phone":    result.Phone,
+					"isKeeper": result.IsKeeper,
+					"token": 	result.Token,
+				})
+			}
 		}
 	})
 	//删除用户

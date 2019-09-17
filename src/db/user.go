@@ -24,8 +24,9 @@ type UserSchema struct {
 	Token string `json:"token"`
 }
 
+
 func InsertUser(data UserInfo) UserSchema {
-	c, session := GetCollect(utils.GetDbName(), "user")
+	c, session := GetCollect("userdb", "user")
 	defer session.Close()
 	m := UserSchema{}
 	m.Phone = data.Phone
@@ -51,7 +52,7 @@ func FindByName(name string) []UserSchema {
 
 func UserSingleFindByKV(key string, v interface{}) UserSchema {
 
-	c, session := GetCollect(utils.GetDbName(), "user")
+	c, session := GetCollect("userdb", "user")
 	defer session.Close()
 
 	results := []UserSchema{}
@@ -67,7 +68,7 @@ func UserSingleFindByKV(key string, v interface{}) UserSchema {
 
 func UserMultiFindByKV( key string, v interface{}) []UserSchema {
 
-	c, session := GetCollect(utils.GetDbName(), "user")
+	c, session := GetCollect("userdb", "user")
 	defer session.Close()
 
 	results := []UserSchema{}
@@ -98,7 +99,7 @@ func CreateUser(name, phone, password, salt string, isKeeper int) UserSchema {
 }
 
 func ChangeUser(id int, name, phone, salt, password string, isKeeper int) error {
-	c, session := GetCollect(utils.GetDbName(), "user")
+	c, session := GetCollect("userdb", "user")
 	defer session.Close()
 
 	selector := bson.M{"id": id}
@@ -110,7 +111,7 @@ func ChangeUser(id int, name, phone, salt, password string, isKeeper int) error 
 }
 
 func RemoveUser(k string, v interface{}) error {
-	c, session := GetCollect(utils.GetDbName(), "user")
+	c, session := GetCollect("userdb", "user")
 	defer session.Close()
 
 	err := c.Remove(bson.M{k: v})
