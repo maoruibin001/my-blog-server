@@ -14,12 +14,10 @@ func InitRouter(router *gin.Engine) {
 	initLseries(router)
 	initImage(router)
 	initProduct(router)
-	//initComment(router)
-	//initDraft(router)
-	//initTag(router)
 	initUser(router)
 	initLogin(router)
-	//initArticle(router)
+	initAccount(router)
+	initCollection(router)
 
 
 	router.GET("/", func(context *gin.Context) {

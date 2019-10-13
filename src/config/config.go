@@ -4,4 +4,9 @@ const (
 	Salt = "ruibinmao"
 	DEFAULTPAGESIZI = "800"
 	DEFAULTPAGENO = "1"
+	APPID = "wx95bd67c3b7c5c989"
+	SECRET = "2b5bf66816586287281b22c323c11743"
+	REDIRECTURL = "https%3A%2F%2F88w87.com"
+	VIPFEE = 20
+	SINGFEE = 10
 )

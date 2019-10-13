@@ -12,6 +12,7 @@ import (
 	"strconv"
 )
 
+
 func createProduct(name,descImg,descImgThumb,gifImg,originFile string, prize, lId, bId int, mainImgList []db.ImgInfoSchema) interface{} {
 	info := db.CreateProduct(name,descImg,descImgThumb,gifImg,originFile, prize, lId, bId, mainImgList)
 	return info
@@ -105,7 +106,6 @@ func initProduct(router *gin.Engine) {
 		fmt.Println("id is: ", id)
 
 		product := db.ProductSingleFindByKV(bson.M{"id": id})
-
 		fmt.Println("product: ", product)
 		if product.Id == id && id != 0{
 			utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, product)
@@ -202,6 +202,9 @@ func initProduct(router *gin.Engine) {
 		fmt.Println("pageSizeStr", pageNoStr)
 		lId := context.Query("lId")
 		bId := context.Query("bId")
+		uidStr := context.Query("uid")
+
+		sort := context.Query("sort")
 
 		fmt.Println("bid is22: ", bId)
 
@@ -215,28 +218,27 @@ func initProduct(router *gin.Engine) {
 		if err != nil {
 			pageNo = 1
 		}
-
 		fmt.Println("pagesize: ", pageSize, pageNo)
 		var products db.RetData
 		//var childProducts db.RetData
 
-		fmt.Println("lId is: ", lId)
+		fmt.Println("sort is: ", sort)
 		if lId != "" && lId != "0" {
 			_lId, err := strconv.Atoi(lId)
 			if err != nil {
 				fmt.Println("err: ", err)
 			}
-			products, err = db.GetProducts(bson.M{"lid": _lId}, pageSize, pageNo, "")
+			products, err = db.GetProducts(bson.M{"lid": _lId}, pageSize, pageNo, sort)
 		} else if bId != ""{
 			_bId, err := strconv.Atoi(bId)
 			if err != nil {
 				fmt.Println("err: ", err)
 			}
 		
-			products, err = db.GetProducts(bson.M{"bid": _bId}, pageSize, pageNo, "")
+			products, err = db.GetProducts(bson.M{"bid": _bId}, pageSize, pageNo, sort)
 
 		} else  {
-			products, err = db.GetProducts(bson.M{}, pageSize, pageNo, "modifydate")
+			products, err = db.GetProducts(bson.M{}, pageSize, pageNo, "-modifydate")
 		}
 
 		fmt.Println("products:", products)
@@ -247,7 +249,26 @@ func initProduct(router *gin.Engine) {
 			})
 			return
 		}
-		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, products)
+
+		uid, err := strconv.Atoi(uidStr)
+		if err != nil {
+			uid = 0
+		}
+		if uid != 0 {
+			for i := 0; i < len(products.Products); i++ {
+				id := products.Products[i].Id
+				collections, err := db.GetCollections(bson.M{"uid": uid, "pid": id}, pageSize, pageNo)
+				fmt.Println("collections is: ", collections)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					if len(collections.Collections) != 0 {
+						products.Products[i].IsCollection = 1
+					}
+				}
+			}
+		}
+ 		utils.ResponseJson(context, http.StatusOK, utils.RESPONSEOK, products)
 	})
 
 	router.GET("/api/someProducts", func(context *gin.Context) {

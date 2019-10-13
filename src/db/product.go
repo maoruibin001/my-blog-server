@@ -36,7 +36,7 @@ type ProductSchema struct {
 	CreateDateStr string `json:"createDateStr"`
 	ModifyDate int64 `json:"modifyDate"`
 	ModifyDateStr string `json:"modifyDateStr"`
-	//Children []ProductSchema `json:"children"`
+	IsCollection int `json:"isCollection"`
 }
 type RetData struct {
 	Products []ProductSchema `json:"products"`
